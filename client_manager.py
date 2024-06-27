@@ -248,8 +248,23 @@ def _has_more_resources_in_future(possible_batches, ree_powered_batches):
     total_max_batches = np.max(np.minimum(possible_batches.values, ree_powered_batches.values))
     
     batches_if_selected = min(possible_batches.to_list()[0], ree_powered_batches.to_list()[0])
-    return (False,0) if (total_max_batches == batches_if_selected) else (True, batches_if_selected)
+    print('total max batches')
+    print(total_max_batches)
+    return (False,batches_if_selected) if (total_max_batches == batches_if_selected) else (True, 0)
 
 def _batches_to_class(batches):
-    # have to implement this
-    return 1
+    # categorise the batches into classes based on number of batches
+    #print all the batches
+    print('batches')
+    print(batches)
+    if batches <= 10:
+        return 0
+    elif batches <= 20:
+        return 1
+    elif batches <= 30:
+        return 2
+    elif batches <= 40:
+        return 3
+    else:
+        return 4
+    

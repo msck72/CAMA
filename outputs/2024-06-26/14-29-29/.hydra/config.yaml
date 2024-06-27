@@ -1,0 +1,26 @@
+NIID_DATA_SEED: 42
+SAVE_TRAINED_MODELS: false
+TIMESTEP_IN_MIN: 1000
+MAX_ROUND_IN_MIN: 60
+MAX_ROUNDS: 1
+MAX_TIME_IN_DAYS: 7
+STOPPING_CRITERIA: None
+NUM_CLIENTS: 100
+CLIENTS_PER_ROUND: 10
+BATCH_SIZE: 10
+MIN_LOCAL_EPOCHS: 1
+MAX_LOCAL_EPOCHS: 5
+SOLAR_SIZE: 800
+scenario: global
+dataset: cifar10
+approach: fedzero_0_1
+overselect: 1
+forecast_error: error
+imbalanced_scenario: false
+seed: None
+RAY_CLIENT_RESOURCES:
+  num_cpus: 1
+  num_gpus: 0
+RAY_INIT_ARGS:
+  ignore_reinit_error: true
+  include_dashboard: false

@@ -1,0 +1,725 @@
+[2024-06-26 14:22:57,853][flwr][INFO] - Starting Flower simulation, config: ServerConfig(num_rounds=1, round_timeout=None)
+[2024-06-26 14:23:01,251][flwr][INFO] - Flower VCE: Ray initialized with resources: {'memory': 2791115982.0, 'CPU': 8.0, 'node:__internal_head__': 1.0, 'node:127.0.0.1': 1.0, 'object_store_memory': 1395557990.0}
+[2024-06-26 14:23:01,251][flwr][INFO] - Optimize your simulation with Flower VCE: https://flower.dev/docs/framework/how-to-run-simulations.html
+[2024-06-26 14:23:01,251][flwr][INFO] - Flower VCE: Resources for each Virtual Client: {'num_cpus': 1.0, 'num_gpus': 0}
+[2024-06-26 14:23:01,257][flwr][INFO] - Flower VCE: Creating VirtualClientEngineActorPool with 8 actors
+[2024-06-26 14:23:01,258][flwr][INFO] - Initializing global parameters
+[2024-06-26 14:23:01,258][flwr][INFO] - Using initial parameters provided by strategy
+[2024-06-26 14:23:01,258][flwr][INFO] - Evaluating initial parameters
+[2024-06-26 14:23:14,736][flwr][INFO] - initial parameters (loss, other metrics): 0.2418656432390213, {'accuracy': 0.1085}
+[2024-06-26 14:23:14,736][flwr][INFO] - FL starting
+[2024-06-26 14:23:14,784][flwr][DEBUG] - fit_round 1: strategy sampled 35 clients (out of 100)
+[2024-06-26 14:24:44,023][flwr][ERROR] - Traceback (most recent call last):
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 138, in _submit_job
+    res = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 408, in get_client_result
+    self.process_unordered_future(timeout=timeout)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 392, in process_unordered_future
+    self._return_actor(actor)  # type: ignore
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/util/actor_pool.py", line 366, in _return_actor
+    self.submit(*self._pending_submits.pop(0))
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 243, in submit
+    future = fn(actor, client_fn, job_fn, cid)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 135, in <lambda>
+    lambda a, c_fn, j_fn, cid: a.run.remote(c_fn, j_fn, cid),
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/actor.py", line 144, in remote
+    return self._remote(args, kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/util/tracing/tracing_helper.py", line 423, in _start_span
+    return method(self, args, kwargs, *_args, **_kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/actor.py", line 190, in _remote
+    return invocation(args, kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/actor.py", line 177, in invocation
+    return actor._actor_method_call(
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/actor.py", line 1175, in _actor_method_call
+    object_refs = worker.core_worker.submit_actor_task(
+  File "python/ray/_raylet.pyx", line 3350, in ray._raylet.CoreWorker.submit_actor_task
+  File "python/ray/_raylet.pyx", line 3355, in ray._raylet.CoreWorker.submit_actor_task
+  File "python/ray/_raylet.pyx", line 649, in ray._raylet.prepare_args_and_increment_put_refs
+  File "python/ray/_raylet.pyx", line 640, in ray._raylet.prepare_args_and_increment_put_refs
+  File "python/ray/_raylet.pyx", line 734, in ray._raylet.prepare_args_internal
+  File "python/ray/_raylet.pyx", line 2939, in ray._raylet.CoreWorker.put_serialized_object_and_increment_local_ref
+  File "python/ray/_raylet.pyx", line 2831, in ray._raylet.CoreWorker._create_put_buffer
+  File "python/ray/_raylet.pyx", line 396, in ray._raylet.check_status
+ray.exceptions.OutOfDiskError: Local disk is full
+The object cannot be created because the local object store is full and the local disk's utilization is over capacity (95% by default).Tip: Use `df` on this node to check disk usage and `ray memory` to check object store memory usage.
+
+[2024-06-26 14:24:44,077][flwr][ERROR] - Local disk is full
+The object cannot be created because the local object store is full and the local disk's utilization is over capacity (95% by default).Tip: Use `df` on this node to check disk usage and `ray memory` to check object store memory usage.
+[2024-06-26 14:24:50,257][flwr][ERROR] - Traceback (most recent call last):
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 138, in _submit_job
+    res = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 408, in get_client_result
+    self.process_unordered_future(timeout=timeout)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 392, in process_unordered_future
+    self._return_actor(actor)  # type: ignore
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/util/actor_pool.py", line 366, in _return_actor
+    self.submit(*self._pending_submits.pop(0))
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 243, in submit
+    future = fn(actor, client_fn, job_fn, cid)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 135, in <lambda>
+    lambda a, c_fn, j_fn, cid: a.run.remote(c_fn, j_fn, cid),
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/actor.py", line 144, in remote
+    return self._remote(args, kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/util/tracing/tracing_helper.py", line 423, in _start_span
+    return method(self, args, kwargs, *_args, **_kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/actor.py", line 190, in _remote
+    return invocation(args, kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/actor.py", line 177, in invocation
+    return actor._actor_method_call(
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/actor.py", line 1175, in _actor_method_call
+    object_refs = worker.core_worker.submit_actor_task(
+  File "python/ray/_raylet.pyx", line 3350, in ray._raylet.CoreWorker.submit_actor_task
+  File "python/ray/_raylet.pyx", line 3355, in ray._raylet.CoreWorker.submit_actor_task
+  File "python/ray/_raylet.pyx", line 649, in ray._raylet.prepare_args_and_increment_put_refs
+  File "python/ray/_raylet.pyx", line 640, in ray._raylet.prepare_args_and_increment_put_refs
+  File "python/ray/_raylet.pyx", line 734, in ray._raylet.prepare_args_internal
+  File "python/ray/_raylet.pyx", line 2939, in ray._raylet.CoreWorker.put_serialized_object_and_increment_local_ref
+  File "python/ray/_raylet.pyx", line 2831, in ray._raylet.CoreWorker._create_put_buffer
+  File "python/ray/_raylet.pyx", line 396, in ray._raylet.check_status
+ray.exceptions.OutOfDiskError: Local disk is full
+The object cannot be created because the local object store is full and the local disk's utilization is over capacity (95% by default).Tip: Use `df` on this node to check disk usage and `ray memory` to check object store memory usage.
+
+[2024-06-26 14:24:50,295][flwr][ERROR] - Local disk is full
+The object cannot be created because the local object store is full and the local disk's utilization is over capacity (95% by default).Tip: Use `df` on this node to check disk usage and `ray memory` to check object store memory usage.
+[2024-06-26 14:24:57,297][flwr][ERROR] - Traceback (most recent call last):
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 138, in _submit_job
+    res = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 408, in get_client_result
+    self.process_unordered_future(timeout=timeout)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 392, in process_unordered_future
+    self._return_actor(actor)  # type: ignore
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/util/actor_pool.py", line 366, in _return_actor
+    self.submit(*self._pending_submits.pop(0))
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 243, in submit
+    future = fn(actor, client_fn, job_fn, cid)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 135, in <lambda>
+    lambda a, c_fn, j_fn, cid: a.run.remote(c_fn, j_fn, cid),
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/actor.py", line 144, in remote
+    return self._remote(args, kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/util/tracing/tracing_helper.py", line 423, in _start_span
+    return method(self, args, kwargs, *_args, **_kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/actor.py", line 190, in _remote
+    return invocation(args, kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/actor.py", line 177, in invocation
+    return actor._actor_method_call(
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/actor.py", line 1175, in _actor_method_call
+    object_refs = worker.core_worker.submit_actor_task(
+  File "python/ray/_raylet.pyx", line 3350, in ray._raylet.CoreWorker.submit_actor_task
+  File "python/ray/_raylet.pyx", line 3355, in ray._raylet.CoreWorker.submit_actor_task
+  File "python/ray/_raylet.pyx", line 649, in ray._raylet.prepare_args_and_increment_put_refs
+  File "python/ray/_raylet.pyx", line 640, in ray._raylet.prepare_args_and_increment_put_refs
+  File "python/ray/_raylet.pyx", line 734, in ray._raylet.prepare_args_internal
+  File "python/ray/_raylet.pyx", line 2939, in ray._raylet.CoreWorker.put_serialized_object_and_increment_local_ref
+  File "python/ray/_raylet.pyx", line 2831, in ray._raylet.CoreWorker._create_put_buffer
+  File "python/ray/_raylet.pyx", line 396, in ray._raylet.check_status
+ray.exceptions.OutOfDiskError: Local disk is full
+The object cannot be created because the local object store is full and the local disk's utilization is over capacity (95% by default).Tip: Use `df` on this node to check disk usage and `ray memory` to check object store memory usage.
+
+[2024-06-26 14:24:57,301][flwr][ERROR] - Local disk is full
+The object cannot be created because the local object store is full and the local disk's utilization is over capacity (95% by default).Tip: Use `df` on this node to check disk usage and `ray memory` to check object store memory usage.
+[2024-06-26 14:25:07,707][flwr][ERROR] - Traceback (most recent call last):
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 138, in _submit_job
+    res = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 408, in get_client_result
+    self.process_unordered_future(timeout=timeout)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 392, in process_unordered_future
+    self._return_actor(actor)  # type: ignore
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/util/actor_pool.py", line 366, in _return_actor
+    self.submit(*self._pending_submits.pop(0))
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 243, in submit
+    future = fn(actor, client_fn, job_fn, cid)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 135, in <lambda>
+    lambda a, c_fn, j_fn, cid: a.run.remote(c_fn, j_fn, cid),
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/actor.py", line 144, in remote
+    return self._remote(args, kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/util/tracing/tracing_helper.py", line 423, in _start_span
+    return method(self, args, kwargs, *_args, **_kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/actor.py", line 190, in _remote
+    return invocation(args, kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/actor.py", line 177, in invocation
+    return actor._actor_method_call(
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/actor.py", line 1175, in _actor_method_call
+    object_refs = worker.core_worker.submit_actor_task(
+  File "python/ray/_raylet.pyx", line 3350, in ray._raylet.CoreWorker.submit_actor_task
+  File "python/ray/_raylet.pyx", line 3355, in ray._raylet.CoreWorker.submit_actor_task
+  File "python/ray/_raylet.pyx", line 649, in ray._raylet.prepare_args_and_increment_put_refs
+  File "python/ray/_raylet.pyx", line 640, in ray._raylet.prepare_args_and_increment_put_refs
+  File "python/ray/_raylet.pyx", line 734, in ray._raylet.prepare_args_internal
+  File "python/ray/_raylet.pyx", line 2939, in ray._raylet.CoreWorker.put_serialized_object_and_increment_local_ref
+  File "python/ray/_raylet.pyx", line 2831, in ray._raylet.CoreWorker._create_put_buffer
+  File "python/ray/_raylet.pyx", line 396, in ray._raylet.check_status
+ray.exceptions.OutOfDiskError: Local disk is full
+The object cannot be created because the local object store is full and the local disk's utilization is over capacity (95% by default).Tip: Use `df` on this node to check disk usage and `ray memory` to check object store memory usage.
+
+[2024-06-26 14:25:07,714][flwr][ERROR] - Local disk is full
+The object cannot be created because the local object store is full and the local disk's utilization is over capacity (95% by default).Tip: Use `df` on this node to check disk usage and `ray memory` to check object store memory usage.
+[2024-06-26 14:25:08,323][flwr][ERROR] - Traceback (most recent call last):
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 138, in _submit_job
+    res = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 408, in get_client_result
+    self.process_unordered_future(timeout=timeout)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 392, in process_unordered_future
+    self._return_actor(actor)  # type: ignore
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/util/actor_pool.py", line 366, in _return_actor
+    self.submit(*self._pending_submits.pop(0))
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 243, in submit
+    future = fn(actor, client_fn, job_fn, cid)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 135, in <lambda>
+    lambda a, c_fn, j_fn, cid: a.run.remote(c_fn, j_fn, cid),
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/actor.py", line 144, in remote
+    return self._remote(args, kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/util/tracing/tracing_helper.py", line 423, in _start_span
+    return method(self, args, kwargs, *_args, **_kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/actor.py", line 190, in _remote
+    return invocation(args, kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/actor.py", line 177, in invocation
+    return actor._actor_method_call(
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/actor.py", line 1175, in _actor_method_call
+    object_refs = worker.core_worker.submit_actor_task(
+  File "python/ray/_raylet.pyx", line 3350, in ray._raylet.CoreWorker.submit_actor_task
+  File "python/ray/_raylet.pyx", line 3355, in ray._raylet.CoreWorker.submit_actor_task
+  File "python/ray/_raylet.pyx", line 649, in ray._raylet.prepare_args_and_increment_put_refs
+  File "python/ray/_raylet.pyx", line 640, in ray._raylet.prepare_args_and_increment_put_refs
+  File "python/ray/_raylet.pyx", line 734, in ray._raylet.prepare_args_internal
+  File "python/ray/_raylet.pyx", line 2939, in ray._raylet.CoreWorker.put_serialized_object_and_increment_local_ref
+  File "python/ray/_raylet.pyx", line 2831, in ray._raylet.CoreWorker._create_put_buffer
+  File "python/ray/_raylet.pyx", line 396, in ray._raylet.check_status
+ray.exceptions.OutOfDiskError: Local disk is full
+The object cannot be created because the local object store is full and the local disk's utilization is over capacity (95% by default).Tip: Use `df` on this node to check disk usage and `ray memory` to check object store memory usage.
+
+[2024-06-26 14:25:08,323][flwr][ERROR] - Local disk is full
+The object cannot be created because the local object store is full and the local disk's utilization is over capacity (95% by default).Tip: Use `df` on this node to check disk usage and `ray memory` to check object store memory usage.
+[2024-06-26 14:25:08,928][flwr][ERROR] - Traceback (most recent call last):
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 138, in _submit_job
+    res = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 408, in get_client_result
+    self.process_unordered_future(timeout=timeout)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 392, in process_unordered_future
+    self._return_actor(actor)  # type: ignore
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/util/actor_pool.py", line 366, in _return_actor
+    self.submit(*self._pending_submits.pop(0))
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 243, in submit
+    future = fn(actor, client_fn, job_fn, cid)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 135, in <lambda>
+    lambda a, c_fn, j_fn, cid: a.run.remote(c_fn, j_fn, cid),
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/actor.py", line 144, in remote
+    return self._remote(args, kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/util/tracing/tracing_helper.py", line 423, in _start_span
+    return method(self, args, kwargs, *_args, **_kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/actor.py", line 190, in _remote
+    return invocation(args, kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/actor.py", line 177, in invocation
+    return actor._actor_method_call(
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/actor.py", line 1175, in _actor_method_call
+    object_refs = worker.core_worker.submit_actor_task(
+  File "python/ray/_raylet.pyx", line 3350, in ray._raylet.CoreWorker.submit_actor_task
+  File "python/ray/_raylet.pyx", line 3355, in ray._raylet.CoreWorker.submit_actor_task
+  File "python/ray/_raylet.pyx", line 649, in ray._raylet.prepare_args_and_increment_put_refs
+  File "python/ray/_raylet.pyx", line 640, in ray._raylet.prepare_args_and_increment_put_refs
+  File "python/ray/_raylet.pyx", line 734, in ray._raylet.prepare_args_internal
+  File "python/ray/_raylet.pyx", line 2939, in ray._raylet.CoreWorker.put_serialized_object_and_increment_local_ref
+  File "python/ray/_raylet.pyx", line 2831, in ray._raylet.CoreWorker._create_put_buffer
+  File "python/ray/_raylet.pyx", line 396, in ray._raylet.check_status
+ray.exceptions.OutOfDiskError: Local disk is full
+The object cannot be created because the local object store is full and the local disk's utilization is over capacity (95% by default).Tip: Use `df` on this node to check disk usage and `ray memory` to check object store memory usage.
+
+[2024-06-26 14:25:08,936][flwr][ERROR] - Local disk is full
+The object cannot be created because the local object store is full and the local disk's utilization is over capacity (95% by default).Tip: Use `df` on this node to check disk usage and `ray memory` to check object store memory usage.
+[2024-06-26 14:25:09,545][flwr][ERROR] - Traceback (most recent call last):
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 138, in _submit_job
+    res = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 408, in get_client_result
+    self.process_unordered_future(timeout=timeout)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 392, in process_unordered_future
+    self._return_actor(actor)  # type: ignore
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/util/actor_pool.py", line 366, in _return_actor
+    self.submit(*self._pending_submits.pop(0))
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 243, in submit
+    future = fn(actor, client_fn, job_fn, cid)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 135, in <lambda>
+    lambda a, c_fn, j_fn, cid: a.run.remote(c_fn, j_fn, cid),
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/actor.py", line 144, in remote
+    return self._remote(args, kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/util/tracing/tracing_helper.py", line 423, in _start_span
+    return method(self, args, kwargs, *_args, **_kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/actor.py", line 190, in _remote
+    return invocation(args, kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/actor.py", line 177, in invocation
+    return actor._actor_method_call(
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/actor.py", line 1175, in _actor_method_call
+    object_refs = worker.core_worker.submit_actor_task(
+  File "python/ray/_raylet.pyx", line 3350, in ray._raylet.CoreWorker.submit_actor_task
+  File "python/ray/_raylet.pyx", line 3355, in ray._raylet.CoreWorker.submit_actor_task
+  File "python/ray/_raylet.pyx", line 649, in ray._raylet.prepare_args_and_increment_put_refs
+  File "python/ray/_raylet.pyx", line 640, in ray._raylet.prepare_args_and_increment_put_refs
+  File "python/ray/_raylet.pyx", line 734, in ray._raylet.prepare_args_internal
+  File "python/ray/_raylet.pyx", line 2939, in ray._raylet.CoreWorker.put_serialized_object_and_increment_local_ref
+  File "python/ray/_raylet.pyx", line 2831, in ray._raylet.CoreWorker._create_put_buffer
+  File "python/ray/_raylet.pyx", line 396, in ray._raylet.check_status
+ray.exceptions.OutOfDiskError: Local disk is full
+The object cannot be created because the local object store is full and the local disk's utilization is over capacity (95% by default).Tip: Use `df` on this node to check disk usage and `ray memory` to check object store memory usage.
+
+[2024-06-26 14:25:09,545][flwr][ERROR] - Local disk is full
+The object cannot be created because the local object store is full and the local disk's utilization is over capacity (95% by default).Tip: Use `df` on this node to check disk usage and `ray memory` to check object store memory usage.
+[2024-06-26 14:25:10,161][flwr][ERROR] - Traceback (most recent call last):
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 138, in _submit_job
+    res = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 408, in get_client_result
+    self.process_unordered_future(timeout=timeout)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 392, in process_unordered_future
+    self._return_actor(actor)  # type: ignore
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/util/actor_pool.py", line 366, in _return_actor
+    self.submit(*self._pending_submits.pop(0))
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 243, in submit
+    future = fn(actor, client_fn, job_fn, cid)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 135, in <lambda>
+    lambda a, c_fn, j_fn, cid: a.run.remote(c_fn, j_fn, cid),
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/actor.py", line 144, in remote
+    return self._remote(args, kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/util/tracing/tracing_helper.py", line 423, in _start_span
+    return method(self, args, kwargs, *_args, **_kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/actor.py", line 190, in _remote
+    return invocation(args, kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/actor.py", line 177, in invocation
+    return actor._actor_method_call(
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/actor.py", line 1175, in _actor_method_call
+    object_refs = worker.core_worker.submit_actor_task(
+  File "python/ray/_raylet.pyx", line 3350, in ray._raylet.CoreWorker.submit_actor_task
+  File "python/ray/_raylet.pyx", line 3355, in ray._raylet.CoreWorker.submit_actor_task
+  File "python/ray/_raylet.pyx", line 649, in ray._raylet.prepare_args_and_increment_put_refs
+  File "python/ray/_raylet.pyx", line 640, in ray._raylet.prepare_args_and_increment_put_refs
+  File "python/ray/_raylet.pyx", line 734, in ray._raylet.prepare_args_internal
+  File "python/ray/_raylet.pyx", line 2939, in ray._raylet.CoreWorker.put_serialized_object_and_increment_local_ref
+  File "python/ray/_raylet.pyx", line 2831, in ray._raylet.CoreWorker._create_put_buffer
+  File "python/ray/_raylet.pyx", line 396, in ray._raylet.check_status
+ray.exceptions.OutOfDiskError: Local disk is full
+The object cannot be created because the local object store is full and the local disk's utilization is over capacity (95% by default).Tip: Use `df` on this node to check disk usage and `ray memory` to check object store memory usage.
+
+[2024-06-26 14:25:10,164][flwr][ERROR] - Local disk is full
+The object cannot be created because the local object store is full and the local disk's utilization is over capacity (95% by default).Tip: Use `df` on this node to check disk usage and `ray memory` to check object store memory usage.
+[2024-06-26 14:25:10,167][flwr][ERROR] - Traceback (most recent call last):
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 138, in _submit_job
+    res = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 414, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 300, in _fetch_future_result
+    res_cid, res = ray.get(future)  # type: (str, ClientRes)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/worker.py", line 2524, in get
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError: [36mray::DefaultActor.run()[39m (pid=17695, ip=127.0.0.1, actor_id=00b4dfc2f02be7fa27cb76b701000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x106bfe050>)
+ray.exceptions.OutOfDiskError: Local disk is full
+The object cannot be created because the local object store is full and the local disk's utilization is over capacity (95% by default).Tip: Use `df` on this node to check disk usage and `ray memory` to check object store memory usage.
+
+[2024-06-26 14:25:10,168][flwr][ERROR] - Traceback (most recent call last):
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 138, in _submit_job
+    res = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 414, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 300, in _fetch_future_result
+    res_cid, res = ray.get(future)  # type: (str, ClientRes)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/worker.py", line 2513, in get
+    raise ValueError(
+ValueError: 'object_refs' must either be an ObjectRef or a list of ObjectRefs.
+
+[2024-06-26 14:25:10,168][flwr][ERROR] - Traceback (most recent call last):
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 138, in _submit_job
+    res = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 414, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 300, in _fetch_future_result
+    res_cid, res = ray.get(future)  # type: (str, ClientRes)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/worker.py", line 2513, in get
+    raise ValueError(
+ValueError: 'object_refs' must either be an ObjectRef or a list of ObjectRefs.
+
+[2024-06-26 14:25:10,168][flwr][ERROR] - Traceback (most recent call last):
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 138, in _submit_job
+    res = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 414, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 300, in _fetch_future_result
+    res_cid, res = ray.get(future)  # type: (str, ClientRes)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/worker.py", line 2524, in get
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError: [36mray::DefaultActor.run()[39m (pid=17694, ip=127.0.0.1, actor_id=a0b4c62b5bc6b457b359c6cb01000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x1062c60b0>)
+ray.exceptions.OutOfDiskError: Local disk is full
+The object cannot be created because the local object store is full and the local disk's utilization is over capacity (95% by default).Tip: Use `df` on this node to check disk usage and `ray memory` to check object store memory usage.
+
+[2024-06-26 14:25:10,169][flwr][ERROR] - Traceback (most recent call last):
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 138, in _submit_job
+    res = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 414, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 300, in _fetch_future_result
+    res_cid, res = ray.get(future)  # type: (str, ClientRes)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/worker.py", line 2524, in get
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError: [36mray::DefaultActor.run()[39m (pid=17693, ip=127.0.0.1, actor_id=4ccc7c0ac91cff36be9c8fcb01000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x112c0e020>)
+ray.exceptions.OutOfDiskError: Local disk is full
+The object cannot be created because the local object store is full and the local disk's utilization is over capacity (95% by default).Tip: Use `df` on this node to check disk usage and `ray memory` to check object store memory usage.
+
+[2024-06-26 14:25:10,169][flwr][ERROR] - Traceback (most recent call last):
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 138, in _submit_job
+    res = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 414, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 300, in _fetch_future_result
+    res_cid, res = ray.get(future)  # type: (str, ClientRes)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/worker.py", line 2513, in get
+    raise ValueError(
+ValueError: 'object_refs' must either be an ObjectRef or a list of ObjectRefs.
+
+[2024-06-26 14:25:10,169][flwr][ERROR] - Traceback (most recent call last):
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 138, in _submit_job
+    res = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 414, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 300, in _fetch_future_result
+    res_cid, res = ray.get(future)  # type: (str, ClientRes)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/worker.py", line 2513, in get
+    raise ValueError(
+ValueError: 'object_refs' must either be an ObjectRef or a list of ObjectRefs.
+
+[2024-06-26 14:25:10,169][flwr][ERROR] - Traceback (most recent call last):
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 138, in _submit_job
+    res = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 414, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 300, in _fetch_future_result
+    res_cid, res = ray.get(future)  # type: (str, ClientRes)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/worker.py", line 2513, in get
+    raise ValueError(
+ValueError: 'object_refs' must either be an ObjectRef or a list of ObjectRefs.
+
+[2024-06-26 14:25:10,169][flwr][ERROR] - Traceback (most recent call last):
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 138, in _submit_job
+    res = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 414, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 300, in _fetch_future_result
+    res_cid, res = ray.get(future)  # type: (str, ClientRes)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/worker.py", line 2513, in get
+    raise ValueError(
+ValueError: 'object_refs' must either be an ObjectRef or a list of ObjectRefs.
+
+[2024-06-26 14:25:10,169][flwr][ERROR] - [36mray::DefaultActor.run()[39m (pid=17695, ip=127.0.0.1, actor_id=00b4dfc2f02be7fa27cb76b701000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x106bfe050>)
+ray.exceptions.OutOfDiskError: Local disk is full
+The object cannot be created because the local object store is full and the local disk's utilization is over capacity (95% by default).Tip: Use `df` on this node to check disk usage and `ray memory` to check object store memory usage.
+[2024-06-26 14:25:10,169][flwr][ERROR] - Traceback (most recent call last):
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 138, in _submit_job
+    res = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 414, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 300, in _fetch_future_result
+    res_cid, res = ray.get(future)  # type: (str, ClientRes)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/worker.py", line 2524, in get
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError: [36mray::DefaultActor.run()[39m (pid=17696, ip=127.0.0.1, actor_id=01fc75834f9a08b5af4ca1d901000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x1094c6050>)
+ray.exceptions.OutOfDiskError: Local disk is full
+The object cannot be created because the local object store is full and the local disk's utilization is over capacity (95% by default).Tip: Use `df` on this node to check disk usage and `ray memory` to check object store memory usage.
+
+[2024-06-26 14:25:10,170][flwr][ERROR] - Traceback (most recent call last):
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 138, in _submit_job
+    res = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 414, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 300, in _fetch_future_result
+    res_cid, res = ray.get(future)  # type: (str, ClientRes)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/worker.py", line 2513, in get
+    raise ValueError(
+ValueError: 'object_refs' must either be an ObjectRef or a list of ObjectRefs.
+
+[2024-06-26 14:25:10,170][flwr][ERROR] - 'object_refs' must either be an ObjectRef or a list of ObjectRefs.
+[2024-06-26 14:25:10,170][flwr][ERROR] - 'object_refs' must either be an ObjectRef or a list of ObjectRefs.
+[2024-06-26 14:25:10,170][flwr][ERROR] - [36mray::DefaultActor.run()[39m (pid=17694, ip=127.0.0.1, actor_id=a0b4c62b5bc6b457b359c6cb01000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x1062c60b0>)
+ray.exceptions.OutOfDiskError: Local disk is full
+The object cannot be created because the local object store is full and the local disk's utilization is over capacity (95% by default).Tip: Use `df` on this node to check disk usage and `ray memory` to check object store memory usage.
+[2024-06-26 14:25:10,170][flwr][ERROR] - Traceback (most recent call last):
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 138, in _submit_job
+    res = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 414, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 300, in _fetch_future_result
+    res_cid, res = ray.get(future)  # type: (str, ClientRes)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/worker.py", line 2513, in get
+    raise ValueError(
+ValueError: 'object_refs' must either be an ObjectRef or a list of ObjectRefs.
+
+[2024-06-26 14:25:10,170][flwr][ERROR] - [36mray::DefaultActor.run()[39m (pid=17693, ip=127.0.0.1, actor_id=4ccc7c0ac91cff36be9c8fcb01000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x112c0e020>)
+ray.exceptions.OutOfDiskError: Local disk is full
+The object cannot be created because the local object store is full and the local disk's utilization is over capacity (95% by default).Tip: Use `df` on this node to check disk usage and `ray memory` to check object store memory usage.
+[2024-06-26 14:25:10,170][flwr][ERROR] - 'object_refs' must either be an ObjectRef or a list of ObjectRefs.
+[2024-06-26 14:25:10,170][flwr][ERROR] - 'object_refs' must either be an ObjectRef or a list of ObjectRefs.
+[2024-06-26 14:25:10,170][flwr][ERROR] - 'object_refs' must either be an ObjectRef or a list of ObjectRefs.
+[2024-06-26 14:25:10,170][flwr][ERROR] - 'object_refs' must either be an ObjectRef or a list of ObjectRefs.
+[2024-06-26 14:25:10,170][flwr][ERROR] - [36mray::DefaultActor.run()[39m (pid=17696, ip=127.0.0.1, actor_id=01fc75834f9a08b5af4ca1d901000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x1094c6050>)
+ray.exceptions.OutOfDiskError: Local disk is full
+The object cannot be created because the local object store is full and the local disk's utilization is over capacity (95% by default).Tip: Use `df` on this node to check disk usage and `ray memory` to check object store memory usage.
+[2024-06-26 14:25:10,170][flwr][ERROR] - 'object_refs' must either be an ObjectRef or a list of ObjectRefs.
+[2024-06-26 14:25:10,171][flwr][ERROR] - Traceback (most recent call last):
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 138, in _submit_job
+    res = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 414, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 300, in _fetch_future_result
+    res_cid, res = ray.get(future)  # type: (str, ClientRes)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/worker.py", line 2513, in get
+    raise ValueError(
+ValueError: 'object_refs' must either be an ObjectRef or a list of ObjectRefs.
+
+[2024-06-26 14:25:10,171][flwr][ERROR] - 'object_refs' must either be an ObjectRef or a list of ObjectRefs.
+[2024-06-26 14:25:10,171][flwr][ERROR] - Traceback (most recent call last):
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 138, in _submit_job
+    res = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 414, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 300, in _fetch_future_result
+    res_cid, res = ray.get(future)  # type: (str, ClientRes)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/worker.py", line 2513, in get
+    raise ValueError(
+ValueError: 'object_refs' must either be an ObjectRef or a list of ObjectRefs.
+
+[2024-06-26 14:25:10,171][flwr][ERROR] - Traceback (most recent call last):
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 138, in _submit_job
+    res = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 414, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 300, in _fetch_future_result
+    res_cid, res = ray.get(future)  # type: (str, ClientRes)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/worker.py", line 2513, in get
+    raise ValueError(
+ValueError: 'object_refs' must either be an ObjectRef or a list of ObjectRefs.
+
+[2024-06-26 14:25:10,171][flwr][ERROR] - Traceback (most recent call last):
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 138, in _submit_job
+    res = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 414, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 300, in _fetch_future_result
+    res_cid, res = ray.get(future)  # type: (str, ClientRes)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/worker.py", line 2513, in get
+    raise ValueError(
+ValueError: 'object_refs' must either be an ObjectRef or a list of ObjectRefs.
+
+[2024-06-26 14:25:10,171][flwr][ERROR] - Traceback (most recent call last):
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 138, in _submit_job
+    res = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 414, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 300, in _fetch_future_result
+    res_cid, res = ray.get(future)  # type: (str, ClientRes)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/worker.py", line 2513, in get
+    raise ValueError(
+ValueError: 'object_refs' must either be an ObjectRef or a list of ObjectRefs.
+
+[2024-06-26 14:25:10,171][flwr][ERROR] - Traceback (most recent call last):
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 138, in _submit_job
+    res = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 414, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 300, in _fetch_future_result
+    res_cid, res = ray.get(future)  # type: (str, ClientRes)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/worker.py", line 2513, in get
+    raise ValueError(
+ValueError: 'object_refs' must either be an ObjectRef or a list of ObjectRefs.
+
+[2024-06-26 14:25:10,171][flwr][ERROR] - Traceback (most recent call last):
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 138, in _submit_job
+    res = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 414, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 300, in _fetch_future_result
+    res_cid, res = ray.get(future)  # type: (str, ClientRes)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/worker.py", line 2513, in get
+    raise ValueError(
+ValueError: 'object_refs' must either be an ObjectRef or a list of ObjectRefs.
+
+[2024-06-26 14:25:10,172][flwr][ERROR] - Traceback (most recent call last):
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 138, in _submit_job
+    res = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 414, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 300, in _fetch_future_result
+    res_cid, res = ray.get(future)  # type: (str, ClientRes)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/worker.py", line 2513, in get
+    raise ValueError(
+ValueError: 'object_refs' must either be an ObjectRef or a list of ObjectRefs.
+
+[2024-06-26 14:25:10,172][flwr][ERROR] - 'object_refs' must either be an ObjectRef or a list of ObjectRefs.
+[2024-06-26 14:25:10,172][flwr][ERROR] - Traceback (most recent call last):
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 138, in _submit_job
+    res = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 414, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 300, in _fetch_future_result
+    res_cid, res = ray.get(future)  # type: (str, ClientRes)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/worker.py", line 2513, in get
+    raise ValueError(
+ValueError: 'object_refs' must either be an ObjectRef or a list of ObjectRefs.
+
+[2024-06-26 14:25:10,172][flwr][ERROR] - Traceback (most recent call last):
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 138, in _submit_job
+    res = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 414, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 300, in _fetch_future_result
+    res_cid, res = ray.get(future)  # type: (str, ClientRes)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/worker.py", line 2513, in get
+    raise ValueError(
+ValueError: 'object_refs' must either be an ObjectRef or a list of ObjectRefs.
+
+[2024-06-26 14:25:10,172][flwr][ERROR] - Traceback (most recent call last):
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 138, in _submit_job
+    res = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 414, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 300, in _fetch_future_result
+    res_cid, res = ray.get(future)  # type: (str, ClientRes)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/worker.py", line 2513, in get
+    raise ValueError(
+ValueError: 'object_refs' must either be an ObjectRef or a list of ObjectRefs.
+
+[2024-06-26 14:25:10,172][flwr][ERROR] - 'object_refs' must either be an ObjectRef or a list of ObjectRefs.
+[2024-06-26 14:25:10,172][flwr][ERROR] - 'object_refs' must either be an ObjectRef or a list of ObjectRefs.
+[2024-06-26 14:25:10,172][flwr][ERROR] - Traceback (most recent call last):
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 138, in _submit_job
+    res = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 414, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 300, in _fetch_future_result
+    res_cid, res = ray.get(future)  # type: (str, ClientRes)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/worker.py", line 2513, in get
+    raise ValueError(
+ValueError: 'object_refs' must either be an ObjectRef or a list of ObjectRefs.
+
+[2024-06-26 14:25:10,172][flwr][ERROR] - 'object_refs' must either be an ObjectRef or a list of ObjectRefs.
+[2024-06-26 14:25:10,172][flwr][ERROR] - 'object_refs' must either be an ObjectRef or a list of ObjectRefs.
+[2024-06-26 14:25:10,172][flwr][ERROR] - 'object_refs' must either be an ObjectRef or a list of ObjectRefs.
+[2024-06-26 14:25:10,172][flwr][ERROR] - 'object_refs' must either be an ObjectRef or a list of ObjectRefs.
+[2024-06-26 14:25:10,172][flwr][ERROR] - 'object_refs' must either be an ObjectRef or a list of ObjectRefs.
+[2024-06-26 14:25:10,172][flwr][ERROR] - 'object_refs' must either be an ObjectRef or a list of ObjectRefs.
+[2024-06-26 14:25:10,172][flwr][ERROR] - Traceback (most recent call last):
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 138, in _submit_job
+    res = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 414, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 300, in _fetch_future_result
+    res_cid, res = ray.get(future)  # type: (str, ClientRes)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/worker.py", line 2513, in get
+    raise ValueError(
+ValueError: 'object_refs' must either be an ObjectRef or a list of ObjectRefs.
+
+[2024-06-26 14:25:10,172][flwr][ERROR] - 'object_refs' must either be an ObjectRef or a list of ObjectRefs.
+[2024-06-26 14:25:10,172][flwr][ERROR] - 'object_refs' must either be an ObjectRef or a list of ObjectRefs.
+[2024-06-26 14:25:10,178][flwr][ERROR] - 'object_refs' must either be an ObjectRef or a list of ObjectRefs.
+[2024-06-26 14:25:10,179][flwr][ERROR] - 'object_refs' must either be an ObjectRef or a list of ObjectRefs.
+[2024-06-26 14:25:10,180][flwr][DEBUG] - fit_round 1 received 2 results and 33 failures
+[2024-06-26 14:25:10,372][flwr][WARNING] - No fit_metrics_aggregation_fn provided
+[2024-06-26 14:25:26,013][flwr][INFO] - fit progress: (1, 0.26999796649217606, {'accuracy': 0.2565}, 131.27905416701105)
+[2024-06-26 14:25:26,014][flwr][INFO] - evaluate_round 1: no clients selected, cancel
+[2024-06-26 14:25:26,014][flwr][INFO] - FL finished in 131.27968070900533
+[2024-06-26 14:25:26,021][flwr][INFO] - app_fit: losses_distributed []
+[2024-06-26 14:25:26,021][flwr][INFO] - app_fit: metrics_distributed_fit {}
+[2024-06-26 14:25:26,021][flwr][INFO] - app_fit: metrics_distributed {}
+[2024-06-26 14:25:26,021][flwr][INFO] - app_fit: losses_centralized [(0, 0.2418656432390213), (1, 0.26999796649217606)]
+[2024-06-26 14:25:26,021][flwr][INFO] - app_fit: metrics_centralized {'accuracy': [(0, 0.1085), (1, 0.2565)]}

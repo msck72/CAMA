@@ -1,0 +1,738 @@
+[2024-06-25 12:26:29,269][flwr][INFO] - Starting Flower simulation, config: ServerConfig(num_rounds=10000, round_timeout=None)
+[2024-06-25 12:26:31,875][flwr][INFO] - Flower VCE: Ray initialized with resources: {'memory': 3495532955.0, 'object_store_memory': 1747766476.0, 'CPU': 8.0, 'node:127.0.0.1': 1.0, 'node:__internal_head__': 1.0}
+[2024-06-25 12:26:31,875][flwr][INFO] - Optimize your simulation with Flower VCE: https://flower.dev/docs/framework/how-to-run-simulations.html
+[2024-06-25 12:26:31,875][flwr][INFO] - Flower VCE: Resources for each Virtual Client: {'num_cpus': 1.0, 'num_gpus': 0}
+[2024-06-25 12:26:31,885][flwr][INFO] - Flower VCE: Creating VirtualClientEngineActorPool with 8 actors
+[2024-06-25 12:26:31,885][flwr][INFO] - Initializing global parameters
+[2024-06-25 12:26:31,885][flwr][INFO] - Using initial parameters provided by strategy
+[2024-06-25 12:26:31,885][flwr][INFO] - Evaluating initial parameters
+[2024-06-25 12:26:45,037][flwr][INFO] - initial parameters (loss, other metrics): 0.2418656432390213, {'accuracy': 0.1085}
+[2024-06-25 12:26:45,037][flwr][INFO] - FL starting
+[2024-06-25 12:26:45,100][flwr][DEBUG] - fit_round 1: strategy sampled 35 clients (out of 100)
+[2024-06-25 12:27:28,693][flwr][ERROR] - Traceback (most recent call last):
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 138, in _submit_job
+    res = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 414, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 300, in _fetch_future_result
+    res_cid, res = ray.get(future)  # type: (str, ClientRes)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/worker.py", line 2524, in get
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError(ClientException): [36mray::DefaultActor.run()[39m (pid=91683, ip=127.0.0.1, actor_id=1f312ef81c54528b60c2e18301000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x12340e020>)
+  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn
+    trainloader=trainloaders[client_id],
+IndexError: list index out of range
+
+The above exception was the direct cause of the following exception:
+
+[36mray::DefaultActor.run()[39m (pid=91683, ip=127.0.0.1, actor_id=1f312ef81c54528b60c2e18301000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x12340e020>)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 84, in run
+    raise ClientException(str(message)) from ex
+flwr.simulation.ray_transport.ray_actor.ClientException: 
+>>>>>>>A ClientException occurred.('\n\tSomething went wrong when running your client workload.\n\tClient 53_Sydney_large crashed when the DefaultActor was running its workload.\n\tException triggered on the client side: Traceback (most recent call last):\n  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 70, in run\n    client = check_clientfn_returns_client(client_fn(cid))\n  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn\n    trainloader=trainloaders[client_id],\nIndexError: list index out of range\n',)
+
+[2024-06-25 12:27:28,703][flwr][ERROR] - [36mray::DefaultActor.run()[39m (pid=91683, ip=127.0.0.1, actor_id=1f312ef81c54528b60c2e18301000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x12340e020>)
+  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn
+    trainloader=trainloaders[client_id],
+IndexError: list index out of range
+
+The above exception was the direct cause of the following exception:
+
+[36mray::DefaultActor.run()[39m (pid=91683, ip=127.0.0.1, actor_id=1f312ef81c54528b60c2e18301000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x12340e020>)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 84, in run
+    raise ClientException(str(message)) from ex
+flwr.simulation.ray_transport.ray_actor.ClientException: 
+>>>>>>>A ClientException occurred.('\n\tSomething went wrong when running your client workload.\n\tClient 53_Sydney_large crashed when the DefaultActor was running its workload.\n\tException triggered on the client side: Traceback (most recent call last):\n  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 70, in run\n    client = check_clientfn_returns_client(client_fn(cid))\n  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn\n    trainloader=trainloaders[client_id],\nIndexError: list index out of range\n',)
+[2024-06-25 12:27:37,327][flwr][ERROR] - Traceback (most recent call last):
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 138, in _submit_job
+    res = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 414, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 300, in _fetch_future_result
+    res_cid, res = ray.get(future)  # type: (str, ClientRes)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/worker.py", line 2524, in get
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError(ClientException): [36mray::DefaultActor.run()[39m (pid=91683, ip=127.0.0.1, actor_id=1f312ef81c54528b60c2e18301000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x12340e020>)
+  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn
+    trainloader=trainloaders[client_id],
+IndexError: list index out of range
+
+The above exception was the direct cause of the following exception:
+
+[36mray::DefaultActor.run()[39m (pid=91683, ip=127.0.0.1, actor_id=1f312ef81c54528b60c2e18301000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x12340e020>)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 84, in run
+    raise ClientException(str(message)) from ex
+flwr.simulation.ray_transport.ray_actor.ClientException: 
+>>>>>>>A ClientException occurred.('\n\tSomething went wrong when running your client workload.\n\tClient 55_Hong Kong_large crashed when the DefaultActor was running its workload.\n\tException triggered on the client side: Traceback (most recent call last):\n  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 70, in run\n    client = check_clientfn_returns_client(client_fn(cid))\n  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn\n    trainloader=trainloaders[client_id],\nIndexError: list index out of range\n',)
+
+[2024-06-25 12:27:37,350][flwr][ERROR] - [36mray::DefaultActor.run()[39m (pid=91683, ip=127.0.0.1, actor_id=1f312ef81c54528b60c2e18301000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x12340e020>)
+  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn
+    trainloader=trainloaders[client_id],
+IndexError: list index out of range
+
+The above exception was the direct cause of the following exception:
+
+[36mray::DefaultActor.run()[39m (pid=91683, ip=127.0.0.1, actor_id=1f312ef81c54528b60c2e18301000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x12340e020>)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 84, in run
+    raise ClientException(str(message)) from ex
+flwr.simulation.ray_transport.ray_actor.ClientException: 
+>>>>>>>A ClientException occurred.('\n\tSomething went wrong when running your client workload.\n\tClient 55_Hong Kong_large crashed when the DefaultActor was running its workload.\n\tException triggered on the client side: Traceback (most recent call last):\n  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 70, in run\n    client = check_clientfn_returns_client(client_fn(cid))\n  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn\n    trainloader=trainloaders[client_id],\nIndexError: list index out of range\n',)
+[2024-06-25 12:28:04,071][flwr][ERROR] - Traceback (most recent call last):
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 138, in _submit_job
+    res = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 414, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 300, in _fetch_future_result
+    res_cid, res = ray.get(future)  # type: (str, ClientRes)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/worker.py", line 2524, in get
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError(ClientException): [36mray::DefaultActor.run()[39m (pid=91685, ip=127.0.0.1, actor_id=30b3043f2636cf93cbcfc60f01000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x111b05f90>)
+  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn
+    trainloader=trainloaders[client_id],
+IndexError: list index out of range
+
+The above exception was the direct cause of the following exception:
+
+[36mray::DefaultActor.run()[39m (pid=91685, ip=127.0.0.1, actor_id=30b3043f2636cf93cbcfc60f01000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x111b05f90>)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 84, in run
+    raise ClientException(str(message)) from ex
+flwr.simulation.ray_transport.ray_actor.ClientException: 
+>>>>>>>A ClientException occurred.('\n\tSomething went wrong when running your client workload.\n\tClient 96_San Francisco_large crashed when the DefaultActor was running its workload.\n\tException triggered on the client side: Traceback (most recent call last):\n  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 70, in run\n    client = check_clientfn_returns_client(client_fn(cid))\n  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn\n    trainloader=trainloaders[client_id],\nIndexError: list index out of range\n',)
+
+[2024-06-25 12:28:04,079][flwr][ERROR] - [36mray::DefaultActor.run()[39m (pid=91685, ip=127.0.0.1, actor_id=30b3043f2636cf93cbcfc60f01000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x111b05f90>)
+  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn
+    trainloader=trainloaders[client_id],
+IndexError: list index out of range
+
+The above exception was the direct cause of the following exception:
+
+[36mray::DefaultActor.run()[39m (pid=91685, ip=127.0.0.1, actor_id=30b3043f2636cf93cbcfc60f01000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x111b05f90>)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 84, in run
+    raise ClientException(str(message)) from ex
+flwr.simulation.ray_transport.ray_actor.ClientException: 
+>>>>>>>A ClientException occurred.('\n\tSomething went wrong when running your client workload.\n\tClient 96_San Francisco_large crashed when the DefaultActor was running its workload.\n\tException triggered on the client side: Traceback (most recent call last):\n  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 70, in run\n    client = check_clientfn_returns_client(client_fn(cid))\n  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn\n    trainloader=trainloaders[client_id],\nIndexError: list index out of range\n',)
+[2024-06-25 12:28:04,086][flwr][ERROR] - Traceback (most recent call last):
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 138, in _submit_job
+    res = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 414, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 300, in _fetch_future_result
+    res_cid, res = ray.get(future)  # type: (str, ClientRes)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/worker.py", line 2524, in get
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError(ClientException): [36mray::DefaultActor.run()[39m (pid=91690, ip=127.0.0.1, actor_id=548337ef0333540f515f434501000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x10900dff0>)
+  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn
+    trainloader=trainloaders[client_id],
+IndexError: list index out of range
+
+The above exception was the direct cause of the following exception:
+
+[36mray::DefaultActor.run()[39m (pid=91690, ip=127.0.0.1, actor_id=548337ef0333540f515f434501000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x10900dff0>)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 84, in run
+    raise ClientException(str(message)) from ex
+flwr.simulation.ray_transport.ray_actor.ClientException: 
+>>>>>>>A ClientException occurred.('\n\tSomething went wrong when running your client workload.\n\tClient 81_Sydney_large crashed when the DefaultActor was running its workload.\n\tException triggered on the client side: Traceback (most recent call last):\n  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 70, in run\n    client = check_clientfn_returns_client(client_fn(cid))\n  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn\n    trainloader=trainloaders[client_id],\nIndexError: list index out of range\n',)
+
+[2024-06-25 12:28:04,140][flwr][ERROR] - [36mray::DefaultActor.run()[39m (pid=91690, ip=127.0.0.1, actor_id=548337ef0333540f515f434501000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x10900dff0>)
+  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn
+    trainloader=trainloaders[client_id],
+IndexError: list index out of range
+
+The above exception was the direct cause of the following exception:
+
+[36mray::DefaultActor.run()[39m (pid=91690, ip=127.0.0.1, actor_id=548337ef0333540f515f434501000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x10900dff0>)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 84, in run
+    raise ClientException(str(message)) from ex
+flwr.simulation.ray_transport.ray_actor.ClientException: 
+>>>>>>>A ClientException occurred.('\n\tSomething went wrong when running your client workload.\n\tClient 81_Sydney_large crashed when the DefaultActor was running its workload.\n\tException triggered on the client side: Traceback (most recent call last):\n  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 70, in run\n    client = check_clientfn_returns_client(client_fn(cid))\n  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn\n    trainloader=trainloaders[client_id],\nIndexError: list index out of range\n',)
+[2024-06-25 12:28:07,058][flwr][ERROR] - Traceback (most recent call last):
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 138, in _submit_job
+    res = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 414, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 300, in _fetch_future_result
+    res_cid, res = ray.get(future)  # type: (str, ClientRes)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/worker.py", line 2524, in get
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError(ClientException): [36mray::DefaultActor.run()[39m (pid=91683, ip=127.0.0.1, actor_id=1f312ef81c54528b60c2e18301000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x12340e020>)
+  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn
+    trainloader=trainloaders[client_id],
+IndexError: list index out of range
+
+The above exception was the direct cause of the following exception:
+
+[36mray::DefaultActor.run()[39m (pid=91683, ip=127.0.0.1, actor_id=1f312ef81c54528b60c2e18301000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x12340e020>)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 84, in run
+    raise ClientException(str(message)) from ex
+flwr.simulation.ray_transport.ray_actor.ClientException: 
+>>>>>>>A ClientException occurred.('\n\tSomething went wrong when running your client workload.\n\tClient 74_Hong Kong_large crashed when the DefaultActor was running its workload.\n\tException triggered on the client side: Traceback (most recent call last):\n  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 70, in run\n    client = check_clientfn_returns_client(client_fn(cid))\n  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn\n    trainloader=trainloaders[client_id],\nIndexError: list index out of range\n',)
+
+[2024-06-25 12:28:07,060][flwr][ERROR] - Traceback (most recent call last):
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 138, in _submit_job
+    res = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 414, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 300, in _fetch_future_result
+    res_cid, res = ray.get(future)  # type: (str, ClientRes)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/worker.py", line 2524, in get
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError(ClientException): [36mray::DefaultActor.run()[39m (pid=91689, ip=127.0.0.1, actor_id=8c379ade8e5237806697187201000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x10690e020>)
+  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn
+    trainloader=trainloaders[client_id],
+IndexError: list index out of range
+
+The above exception was the direct cause of the following exception:
+
+[36mray::DefaultActor.run()[39m (pid=91689, ip=127.0.0.1, actor_id=8c379ade8e5237806697187201000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x10690e020>)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 84, in run
+    raise ClientException(str(message)) from ex
+flwr.simulation.ray_transport.ray_actor.ClientException: 
+>>>>>>>A ClientException occurred.('\n\tSomething went wrong when running your client workload.\n\tClient 76_Sydney_large crashed when the DefaultActor was running its workload.\n\tException triggered on the client side: Traceback (most recent call last):\n  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 70, in run\n    client = check_clientfn_returns_client(client_fn(cid))\n  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn\n    trainloader=trainloaders[client_id],\nIndexError: list index out of range\n',)
+
+[2024-06-25 12:28:07,080][flwr][ERROR] - Traceback (most recent call last):
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 138, in _submit_job
+    res = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 414, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 300, in _fetch_future_result
+    res_cid, res = ray.get(future)  # type: (str, ClientRes)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/worker.py", line 2524, in get
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError(ClientException): [36mray::DefaultActor.run()[39m (pid=91686, ip=127.0.0.1, actor_id=76629e485dd1842fc560be2901000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x11241e050>)
+  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn
+    trainloader=trainloaders[client_id],
+IndexError: list index out of range
+
+The above exception was the direct cause of the following exception:
+
+[36mray::DefaultActor.run()[39m (pid=91686, ip=127.0.0.1, actor_id=76629e485dd1842fc560be2901000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x11241e050>)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 84, in run
+    raise ClientException(str(message)) from ex
+flwr.simulation.ray_transport.ray_actor.ClientException: 
+>>>>>>>A ClientException occurred.('\n\tSomething went wrong when running your client workload.\n\tClient 91_San Francisco_large crashed when the DefaultActor was running its workload.\n\tException triggered on the client side: Traceback (most recent call last):\n  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 70, in run\n    client = check_clientfn_returns_client(client_fn(cid))\n  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn\n    trainloader=trainloaders[client_id],\nIndexError: list index out of range\n',)
+
+[2024-06-25 12:28:07,093][flwr][ERROR] - [36mray::DefaultActor.run()[39m (pid=91683, ip=127.0.0.1, actor_id=1f312ef81c54528b60c2e18301000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x12340e020>)
+  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn
+    trainloader=trainloaders[client_id],
+IndexError: list index out of range
+
+The above exception was the direct cause of the following exception:
+
+[36mray::DefaultActor.run()[39m (pid=91683, ip=127.0.0.1, actor_id=1f312ef81c54528b60c2e18301000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x12340e020>)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 84, in run
+    raise ClientException(str(message)) from ex
+flwr.simulation.ray_transport.ray_actor.ClientException: 
+>>>>>>>A ClientException occurred.('\n\tSomething went wrong when running your client workload.\n\tClient 74_Hong Kong_large crashed when the DefaultActor was running its workload.\n\tException triggered on the client side: Traceback (most recent call last):\n  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 70, in run\n    client = check_clientfn_returns_client(client_fn(cid))\n  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn\n    trainloader=trainloaders[client_id],\nIndexError: list index out of range\n',)
+[2024-06-25 12:28:07,107][flwr][ERROR] - [36mray::DefaultActor.run()[39m (pid=91689, ip=127.0.0.1, actor_id=8c379ade8e5237806697187201000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x10690e020>)
+  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn
+    trainloader=trainloaders[client_id],
+IndexError: list index out of range
+
+The above exception was the direct cause of the following exception:
+
+[36mray::DefaultActor.run()[39m (pid=91689, ip=127.0.0.1, actor_id=8c379ade8e5237806697187201000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x10690e020>)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 84, in run
+    raise ClientException(str(message)) from ex
+flwr.simulation.ray_transport.ray_actor.ClientException: 
+>>>>>>>A ClientException occurred.('\n\tSomething went wrong when running your client workload.\n\tClient 76_Sydney_large crashed when the DefaultActor was running its workload.\n\tException triggered on the client side: Traceback (most recent call last):\n  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 70, in run\n    client = check_clientfn_returns_client(client_fn(cid))\n  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn\n    trainloader=trainloaders[client_id],\nIndexError: list index out of range\n',)
+[2024-06-25 12:28:07,127][flwr][ERROR] - [36mray::DefaultActor.run()[39m (pid=91686, ip=127.0.0.1, actor_id=76629e485dd1842fc560be2901000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x11241e050>)
+  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn
+    trainloader=trainloaders[client_id],
+IndexError: list index out of range
+
+The above exception was the direct cause of the following exception:
+
+[36mray::DefaultActor.run()[39m (pid=91686, ip=127.0.0.1, actor_id=76629e485dd1842fc560be2901000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x11241e050>)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 84, in run
+    raise ClientException(str(message)) from ex
+flwr.simulation.ray_transport.ray_actor.ClientException: 
+>>>>>>>A ClientException occurred.('\n\tSomething went wrong when running your client workload.\n\tClient 91_San Francisco_large crashed when the DefaultActor was running its workload.\n\tException triggered on the client side: Traceback (most recent call last):\n  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 70, in run\n    client = check_clientfn_returns_client(client_fn(cid))\n  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn\n    trainloader=trainloaders[client_id],\nIndexError: list index out of range\n',)
+[2024-06-25 12:28:29,121][flwr][ERROR] - Traceback (most recent call last):
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 138, in _submit_job
+    res = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 414, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 300, in _fetch_future_result
+    res_cid, res = ray.get(future)  # type: (str, ClientRes)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/worker.py", line 2524, in get
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError(ClientException): [36mray::DefaultActor.run()[39m (pid=91684, ip=127.0.0.1, actor_id=41f1300c350b681860b1328501000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x122882080>)
+  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn
+    trainloader=trainloaders[client_id],
+IndexError: list index out of range
+
+The above exception was the direct cause of the following exception:
+
+[36mray::DefaultActor.run()[39m (pid=91684, ip=127.0.0.1, actor_id=41f1300c350b681860b1328501000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x122882080>)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 84, in run
+    raise ClientException(str(message)) from ex
+flwr.simulation.ray_transport.ray_actor.ClientException: 
+>>>>>>>A ClientException occurred.('\n\tSomething went wrong when running your client workload.\n\tClient 56_Hong Kong_mid crashed when the DefaultActor was running its workload.\n\tException triggered on the client side: Traceback (most recent call last):\n  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 70, in run\n    client = check_clientfn_returns_client(client_fn(cid))\n  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn\n    trainloader=trainloaders[client_id],\nIndexError: list index out of range\n',)
+
+[2024-06-25 12:28:29,165][flwr][ERROR] - [36mray::DefaultActor.run()[39m (pid=91684, ip=127.0.0.1, actor_id=41f1300c350b681860b1328501000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x122882080>)
+  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn
+    trainloader=trainloaders[client_id],
+IndexError: list index out of range
+
+The above exception was the direct cause of the following exception:
+
+[36mray::DefaultActor.run()[39m (pid=91684, ip=127.0.0.1, actor_id=41f1300c350b681860b1328501000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x122882080>)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 84, in run
+    raise ClientException(str(message)) from ex
+flwr.simulation.ray_transport.ray_actor.ClientException: 
+>>>>>>>A ClientException occurred.('\n\tSomething went wrong when running your client workload.\n\tClient 56_Hong Kong_mid crashed when the DefaultActor was running its workload.\n\tException triggered on the client side: Traceback (most recent call last):\n  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 70, in run\n    client = check_clientfn_returns_client(client_fn(cid))\n  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn\n    trainloader=trainloaders[client_id],\nIndexError: list index out of range\n',)
+[2024-06-25 12:28:33,957][flwr][ERROR] - Traceback (most recent call last):
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 138, in _submit_job
+    res = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 414, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 300, in _fetch_future_result
+    res_cid, res = ray.get(future)  # type: (str, ClientRes)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/worker.py", line 2524, in get
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError(ClientException): [36mray::DefaultActor.run()[39m (pid=91684, ip=127.0.0.1, actor_id=41f1300c350b681860b1328501000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x122882080>)
+  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn
+    trainloader=trainloaders[client_id],
+IndexError: list index out of range
+
+The above exception was the direct cause of the following exception:
+
+[36mray::DefaultActor.run()[39m (pid=91684, ip=127.0.0.1, actor_id=41f1300c350b681860b1328501000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x122882080>)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 84, in run
+    raise ClientException(str(message)) from ex
+flwr.simulation.ray_transport.ray_actor.ClientException: 
+>>>>>>>A ClientException occurred.('\n\tSomething went wrong when running your client workload.\n\tClient 87_San Francisco_mid crashed when the DefaultActor was running its workload.\n\tException triggered on the client side: Traceback (most recent call last):\n  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 70, in run\n    client = check_clientfn_returns_client(client_fn(cid))\n  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn\n    trainloader=trainloaders[client_id],\nIndexError: list index out of range\n',)
+
+[2024-06-25 12:28:33,978][flwr][ERROR] - [36mray::DefaultActor.run()[39m (pid=91684, ip=127.0.0.1, actor_id=41f1300c350b681860b1328501000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x122882080>)
+  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn
+    trainloader=trainloaders[client_id],
+IndexError: list index out of range
+
+The above exception was the direct cause of the following exception:
+
+[36mray::DefaultActor.run()[39m (pid=91684, ip=127.0.0.1, actor_id=41f1300c350b681860b1328501000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x122882080>)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 84, in run
+    raise ClientException(str(message)) from ex
+flwr.simulation.ray_transport.ray_actor.ClientException: 
+>>>>>>>A ClientException occurred.('\n\tSomething went wrong when running your client workload.\n\tClient 87_San Francisco_mid crashed when the DefaultActor was running its workload.\n\tException triggered on the client side: Traceback (most recent call last):\n  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 70, in run\n    client = check_clientfn_returns_client(client_fn(cid))\n  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn\n    trainloader=trainloaders[client_id],\nIndexError: list index out of range\n',)
+[2024-06-25 12:28:36,344][flwr][ERROR] - Traceback (most recent call last):
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 138, in _submit_job
+    res = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 414, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 300, in _fetch_future_result
+    res_cid, res = ray.get(future)  # type: (str, ClientRes)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/worker.py", line 2524, in get
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError(ClientException): [36mray::DefaultActor.run()[39m (pid=91686, ip=127.0.0.1, actor_id=76629e485dd1842fc560be2901000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x11241e050>)
+  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn
+    trainloader=trainloaders[client_id],
+IndexError: list index out of range
+
+The above exception was the direct cause of the following exception:
+
+[36mray::DefaultActor.run()[39m (pid=91686, ip=127.0.0.1, actor_id=76629e485dd1842fc560be2901000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x11241e050>)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 84, in run
+    raise ClientException(str(message)) from ex
+flwr.simulation.ray_transport.ray_actor.ClientException: 
+>>>>>>>A ClientException occurred.('\n\tSomething went wrong when running your client workload.\n\tClient 78_San Francisco_mid crashed when the DefaultActor was running its workload.\n\tException triggered on the client side: Traceback (most recent call last):\n  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 70, in run\n    client = check_clientfn_returns_client(client_fn(cid))\n  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn\n    trainloader=trainloaders[client_id],\nIndexError: list index out of range\n',)
+
+[2024-06-25 12:28:36,357][flwr][ERROR] - [36mray::DefaultActor.run()[39m (pid=91686, ip=127.0.0.1, actor_id=76629e485dd1842fc560be2901000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x11241e050>)
+  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn
+    trainloader=trainloaders[client_id],
+IndexError: list index out of range
+
+The above exception was the direct cause of the following exception:
+
+[36mray::DefaultActor.run()[39m (pid=91686, ip=127.0.0.1, actor_id=76629e485dd1842fc560be2901000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x11241e050>)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 84, in run
+    raise ClientException(str(message)) from ex
+flwr.simulation.ray_transport.ray_actor.ClientException: 
+>>>>>>>A ClientException occurred.('\n\tSomething went wrong when running your client workload.\n\tClient 78_San Francisco_mid crashed when the DefaultActor was running its workload.\n\tException triggered on the client side: Traceback (most recent call last):\n  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 70, in run\n    client = check_clientfn_returns_client(client_fn(cid))\n  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn\n    trainloader=trainloaders[client_id],\nIndexError: list index out of range\n',)
+[2024-06-25 12:28:49,317][flwr][ERROR] - Traceback (most recent call last):
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 138, in _submit_job
+    res = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 414, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 300, in _fetch_future_result
+    res_cid, res = ray.get(future)  # type: (str, ClientRes)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/worker.py", line 2524, in get
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError(ClientException): [36mray::DefaultActor.run()[39m (pid=91687, ip=127.0.0.1, actor_id=400939d35d69494981d472bd01000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x114f0e020>)
+  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn
+    trainloader=trainloaders[client_id],
+IndexError: list index out of range
+
+The above exception was the direct cause of the following exception:
+
+[36mray::DefaultActor.run()[39m (pid=91687, ip=127.0.0.1, actor_id=400939d35d69494981d472bd01000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x114f0e020>)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 84, in run
+    raise ClientException(str(message)) from ex
+flwr.simulation.ray_transport.ray_actor.ClientException: 
+>>>>>>>A ClientException occurred.('\n\tSomething went wrong when running your client workload.\n\tClient 92_San Francisco_mid crashed when the DefaultActor was running its workload.\n\tException triggered on the client side: Traceback (most recent call last):\n  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 70, in run\n    client = check_clientfn_returns_client(client_fn(cid))\n  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn\n    trainloader=trainloaders[client_id],\nIndexError: list index out of range\n',)
+
+[2024-06-25 12:28:49,384][flwr][ERROR] - [36mray::DefaultActor.run()[39m (pid=91687, ip=127.0.0.1, actor_id=400939d35d69494981d472bd01000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x114f0e020>)
+  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn
+    trainloader=trainloaders[client_id],
+IndexError: list index out of range
+
+The above exception was the direct cause of the following exception:
+
+[36mray::DefaultActor.run()[39m (pid=91687, ip=127.0.0.1, actor_id=400939d35d69494981d472bd01000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x114f0e020>)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 84, in run
+    raise ClientException(str(message)) from ex
+flwr.simulation.ray_transport.ray_actor.ClientException: 
+>>>>>>>A ClientException occurred.('\n\tSomething went wrong when running your client workload.\n\tClient 92_San Francisco_mid crashed when the DefaultActor was running its workload.\n\tException triggered on the client side: Traceback (most recent call last):\n  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 70, in run\n    client = check_clientfn_returns_client(client_fn(cid))\n  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn\n    trainloader=trainloaders[client_id],\nIndexError: list index out of range\n',)
+[2024-06-25 12:29:05,423][flwr][ERROR] - Traceback (most recent call last):
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 138, in _submit_job
+    res = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 414, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 300, in _fetch_future_result
+    res_cid, res = ray.get(future)  # type: (str, ClientRes)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/worker.py", line 2524, in get
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError(ClientException): [36mray::DefaultActor.run()[39m (pid=91685, ip=127.0.0.1, actor_id=30b3043f2636cf93cbcfc60f01000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x111b05f90>)
+  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn
+    trainloader=trainloaders[client_id],
+IndexError: list index out of range
+
+The above exception was the direct cause of the following exception:
+
+[36mray::DefaultActor.run()[39m (pid=91685, ip=127.0.0.1, actor_id=30b3043f2636cf93cbcfc60f01000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x111b05f90>)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 84, in run
+    raise ClientException(str(message)) from ex
+flwr.simulation.ray_transport.ray_actor.ClientException: 
+>>>>>>>A ClientException occurred.('\n\tSomething went wrong when running your client workload.\n\tClient 71_Sydney_mid crashed when the DefaultActor was running its workload.\n\tException triggered on the client side: Traceback (most recent call last):\n  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 70, in run\n    client = check_clientfn_returns_client(client_fn(cid))\n  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn\n    trainloader=trainloaders[client_id],\nIndexError: list index out of range\n',)
+
+[2024-06-25 12:29:05,492][flwr][ERROR] - [36mray::DefaultActor.run()[39m (pid=91685, ip=127.0.0.1, actor_id=30b3043f2636cf93cbcfc60f01000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x111b05f90>)
+  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn
+    trainloader=trainloaders[client_id],
+IndexError: list index out of range
+
+The above exception was the direct cause of the following exception:
+
+[36mray::DefaultActor.run()[39m (pid=91685, ip=127.0.0.1, actor_id=30b3043f2636cf93cbcfc60f01000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x111b05f90>)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 84, in run
+    raise ClientException(str(message)) from ex
+flwr.simulation.ray_transport.ray_actor.ClientException: 
+>>>>>>>A ClientException occurred.('\n\tSomething went wrong when running your client workload.\n\tClient 71_Sydney_mid crashed when the DefaultActor was running its workload.\n\tException triggered on the client side: Traceback (most recent call last):\n  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 70, in run\n    client = check_clientfn_returns_client(client_fn(cid))\n  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn\n    trainloader=trainloaders[client_id],\nIndexError: list index out of range\n',)
+[2024-06-25 12:29:17,555][flwr][ERROR] - Traceback (most recent call last):
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 138, in _submit_job
+    res = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 414, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 300, in _fetch_future_result
+    res_cid, res = ray.get(future)  # type: (str, ClientRes)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/worker.py", line 2524, in get
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError(ClientException): [36mray::DefaultActor.run()[39m (pid=91690, ip=127.0.0.1, actor_id=548337ef0333540f515f434501000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x10900dff0>)
+  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn
+    trainloader=trainloaders[client_id],
+IndexError: list index out of range
+
+The above exception was the direct cause of the following exception:
+
+[36mray::DefaultActor.run()[39m (pid=91690, ip=127.0.0.1, actor_id=548337ef0333540f515f434501000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x10900dff0>)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 84, in run
+    raise ClientException(str(message)) from ex
+flwr.simulation.ray_transport.ray_actor.ClientException: 
+>>>>>>>A ClientException occurred.('\n\tSomething went wrong when running your client workload.\n\tClient 61_Mexico City_small crashed when the DefaultActor was running its workload.\n\tException triggered on the client side: Traceback (most recent call last):\n  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 70, in run\n    client = check_clientfn_returns_client(client_fn(cid))\n  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn\n    trainloader=trainloaders[client_id],\nIndexError: list index out of range\n',)
+
+[2024-06-25 12:29:17,555][flwr][ERROR] - Traceback (most recent call last):
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 138, in _submit_job
+    res = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 414, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 300, in _fetch_future_result
+    res_cid, res = ray.get(future)  # type: (str, ClientRes)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/worker.py", line 2524, in get
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError(ClientException): [36mray::DefaultActor.run()[39m (pid=91685, ip=127.0.0.1, actor_id=30b3043f2636cf93cbcfc60f01000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x111b05f90>)
+  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn
+    trainloader=trainloaders[client_id],
+IndexError: list index out of range
+
+The above exception was the direct cause of the following exception:
+
+[36mray::DefaultActor.run()[39m (pid=91685, ip=127.0.0.1, actor_id=30b3043f2636cf93cbcfc60f01000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x111b05f90>)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 84, in run
+    raise ClientException(str(message)) from ex
+flwr.simulation.ray_transport.ray_actor.ClientException: 
+>>>>>>>A ClientException occurred.('\n\tSomething went wrong when running your client workload.\n\tClient 66_Hong Kong_small crashed when the DefaultActor was running its workload.\n\tException triggered on the client side: Traceback (most recent call last):\n  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 70, in run\n    client = check_clientfn_returns_client(client_fn(cid))\n  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn\n    trainloader=trainloaders[client_id],\nIndexError: list index out of range\n',)
+
+[2024-06-25 12:29:17,556][flwr][ERROR] - [36mray::DefaultActor.run()[39m (pid=91690, ip=127.0.0.1, actor_id=548337ef0333540f515f434501000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x10900dff0>)
+  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn
+    trainloader=trainloaders[client_id],
+IndexError: list index out of range
+
+The above exception was the direct cause of the following exception:
+
+[36mray::DefaultActor.run()[39m (pid=91690, ip=127.0.0.1, actor_id=548337ef0333540f515f434501000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x10900dff0>)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 84, in run
+    raise ClientException(str(message)) from ex
+flwr.simulation.ray_transport.ray_actor.ClientException: 
+>>>>>>>A ClientException occurred.('\n\tSomething went wrong when running your client workload.\n\tClient 61_Mexico City_small crashed when the DefaultActor was running its workload.\n\tException triggered on the client side: Traceback (most recent call last):\n  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 70, in run\n    client = check_clientfn_returns_client(client_fn(cid))\n  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn\n    trainloader=trainloaders[client_id],\nIndexError: list index out of range\n',)
+[2024-06-25 12:29:17,556][flwr][ERROR] - [36mray::DefaultActor.run()[39m (pid=91685, ip=127.0.0.1, actor_id=30b3043f2636cf93cbcfc60f01000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x111b05f90>)
+  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn
+    trainloader=trainloaders[client_id],
+IndexError: list index out of range
+
+The above exception was the direct cause of the following exception:
+
+[36mray::DefaultActor.run()[39m (pid=91685, ip=127.0.0.1, actor_id=30b3043f2636cf93cbcfc60f01000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x111b05f90>)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 84, in run
+    raise ClientException(str(message)) from ex
+flwr.simulation.ray_transport.ray_actor.ClientException: 
+>>>>>>>A ClientException occurred.('\n\tSomething went wrong when running your client workload.\n\tClient 66_Hong Kong_small crashed when the DefaultActor was running its workload.\n\tException triggered on the client side: Traceback (most recent call last):\n  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 70, in run\n    client = check_clientfn_returns_client(client_fn(cid))\n  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn\n    trainloader=trainloaders[client_id],\nIndexError: list index out of range\n',)
+[2024-06-25 12:29:17,558][flwr][ERROR] - Traceback (most recent call last):
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 138, in _submit_job
+    res = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 414, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 300, in _fetch_future_result
+    res_cid, res = ray.get(future)  # type: (str, ClientRes)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/worker.py", line 2524, in get
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError(ClientException): [36mray::DefaultActor.run()[39m (pid=91684, ip=127.0.0.1, actor_id=41f1300c350b681860b1328501000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x122882080>)
+  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn
+    trainloader=trainloaders[client_id],
+IndexError: list index out of range
+
+The above exception was the direct cause of the following exception:
+
+[36mray::DefaultActor.run()[39m (pid=91684, ip=127.0.0.1, actor_id=41f1300c350b681860b1328501000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x122882080>)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 84, in run
+    raise ClientException(str(message)) from ex
+flwr.simulation.ray_transport.ray_actor.ClientException: 
+>>>>>>>A ClientException occurred.('\n\tSomething went wrong when running your client workload.\n\tClient 68_Sydney_small crashed when the DefaultActor was running its workload.\n\tException triggered on the client side: Traceback (most recent call last):\n  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 70, in run\n    client = check_clientfn_returns_client(client_fn(cid))\n  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn\n    trainloader=trainloaders[client_id],\nIndexError: list index out of range\n',)
+
+[2024-06-25 12:29:17,559][flwr][ERROR] - Traceback (most recent call last):
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 138, in _submit_job
+    res = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 414, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 300, in _fetch_future_result
+    res_cid, res = ray.get(future)  # type: (str, ClientRes)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/worker.py", line 2524, in get
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError(ClientException): [36mray::DefaultActor.run()[39m (pid=91685, ip=127.0.0.1, actor_id=30b3043f2636cf93cbcfc60f01000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x111b05f90>)
+  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn
+    trainloader=trainloaders[client_id],
+IndexError: list index out of range
+
+The above exception was the direct cause of the following exception:
+
+[36mray::DefaultActor.run()[39m (pid=91685, ip=127.0.0.1, actor_id=30b3043f2636cf93cbcfc60f01000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x111b05f90>)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 84, in run
+    raise ClientException(str(message)) from ex
+flwr.simulation.ray_transport.ray_actor.ClientException: 
+>>>>>>>A ClientException occurred.('\n\tSomething went wrong when running your client workload.\n\tClient 73_Mexico City_small crashed when the DefaultActor was running its workload.\n\tException triggered on the client side: Traceback (most recent call last):\n  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 70, in run\n    client = check_clientfn_returns_client(client_fn(cid))\n  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn\n    trainloader=trainloaders[client_id],\nIndexError: list index out of range\n',)
+
+[2024-06-25 12:29:17,559][flwr][ERROR] - [36mray::DefaultActor.run()[39m (pid=91684, ip=127.0.0.1, actor_id=41f1300c350b681860b1328501000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x122882080>)
+  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn
+    trainloader=trainloaders[client_id],
+IndexError: list index out of range
+
+The above exception was the direct cause of the following exception:
+
+[36mray::DefaultActor.run()[39m (pid=91684, ip=127.0.0.1, actor_id=41f1300c350b681860b1328501000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x122882080>)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 84, in run
+    raise ClientException(str(message)) from ex
+flwr.simulation.ray_transport.ray_actor.ClientException: 
+>>>>>>>A ClientException occurred.('\n\tSomething went wrong when running your client workload.\n\tClient 68_Sydney_small crashed when the DefaultActor was running its workload.\n\tException triggered on the client side: Traceback (most recent call last):\n  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 70, in run\n    client = check_clientfn_returns_client(client_fn(cid))\n  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn\n    trainloader=trainloaders[client_id],\nIndexError: list index out of range\n',)
+[2024-06-25 12:29:17,559][flwr][ERROR] - Traceback (most recent call last):
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 138, in _submit_job
+    res = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 414, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 300, in _fetch_future_result
+    res_cid, res = ray.get(future)  # type: (str, ClientRes)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/worker.py", line 2524, in get
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError(ClientException): [36mray::DefaultActor.run()[39m (pid=91690, ip=127.0.0.1, actor_id=548337ef0333540f515f434501000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x10900dff0>)
+  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn
+    trainloader=trainloaders[client_id],
+IndexError: list index out of range
+
+The above exception was the direct cause of the following exception:
+
+[36mray::DefaultActor.run()[39m (pid=91690, ip=127.0.0.1, actor_id=548337ef0333540f515f434501000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x10900dff0>)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 84, in run
+    raise ClientException(str(message)) from ex
+flwr.simulation.ray_transport.ray_actor.ClientException: 
+>>>>>>>A ClientException occurred.('\n\tSomething went wrong when running your client workload.\n\tClient 84_Mexico City_small crashed when the DefaultActor was running its workload.\n\tException triggered on the client side: Traceback (most recent call last):\n  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 70, in run\n    client = check_clientfn_returns_client(client_fn(cid))\n  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn\n    trainloader=trainloaders[client_id],\nIndexError: list index out of range\n',)
+
+[2024-06-25 12:29:17,559][flwr][ERROR] - [36mray::DefaultActor.run()[39m (pid=91685, ip=127.0.0.1, actor_id=30b3043f2636cf93cbcfc60f01000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x111b05f90>)
+  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn
+    trainloader=trainloaders[client_id],
+IndexError: list index out of range
+
+The above exception was the direct cause of the following exception:
+
+[36mray::DefaultActor.run()[39m (pid=91685, ip=127.0.0.1, actor_id=30b3043f2636cf93cbcfc60f01000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x111b05f90>)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 84, in run
+    raise ClientException(str(message)) from ex
+flwr.simulation.ray_transport.ray_actor.ClientException: 
+>>>>>>>A ClientException occurred.('\n\tSomething went wrong when running your client workload.\n\tClient 73_Mexico City_small crashed when the DefaultActor was running its workload.\n\tException triggered on the client side: Traceback (most recent call last):\n  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 70, in run\n    client = check_clientfn_returns_client(client_fn(cid))\n  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn\n    trainloader=trainloaders[client_id],\nIndexError: list index out of range\n',)
+[2024-06-25 12:29:17,560][flwr][ERROR] - [36mray::DefaultActor.run()[39m (pid=91690, ip=127.0.0.1, actor_id=548337ef0333540f515f434501000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x10900dff0>)
+  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn
+    trainloader=trainloaders[client_id],
+IndexError: list index out of range
+
+The above exception was the direct cause of the following exception:
+
+[36mray::DefaultActor.run()[39m (pid=91690, ip=127.0.0.1, actor_id=548337ef0333540f515f434501000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x10900dff0>)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 84, in run
+    raise ClientException(str(message)) from ex
+flwr.simulation.ray_transport.ray_actor.ClientException: 
+>>>>>>>A ClientException occurred.('\n\tSomething went wrong when running your client workload.\n\tClient 84_Mexico City_small crashed when the DefaultActor was running its workload.\n\tException triggered on the client side: Traceback (most recent call last):\n  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 70, in run\n    client = check_clientfn_returns_client(client_fn(cid))\n  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn\n    trainloader=trainloaders[client_id],\nIndexError: list index out of range\n',)
+[2024-06-25 12:29:17,852][flwr][ERROR] - Traceback (most recent call last):
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 138, in _submit_job
+    res = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 414, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 300, in _fetch_future_result
+    res_cid, res = ray.get(future)  # type: (str, ClientRes)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/worker.py", line 2524, in get
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError(ClientException): [36mray::DefaultActor.run()[39m (pid=91686, ip=127.0.0.1, actor_id=76629e485dd1842fc560be2901000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x11241e050>)
+  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn
+    trainloader=trainloaders[client_id],
+IndexError: list index out of range
+
+The above exception was the direct cause of the following exception:
+
+[36mray::DefaultActor.run()[39m (pid=91686, ip=127.0.0.1, actor_id=76629e485dd1842fc560be2901000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x11241e050>)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 84, in run
+    raise ClientException(str(message)) from ex
+flwr.simulation.ray_transport.ray_actor.ClientException: 
+>>>>>>>A ClientException occurred.('\n\tSomething went wrong when running your client workload.\n\tClient 89_San Francisco_small crashed when the DefaultActor was running its workload.\n\tException triggered on the client side: Traceback (most recent call last):\n  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 70, in run\n    client = check_clientfn_returns_client(client_fn(cid))\n  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn\n    trainloader=trainloaders[client_id],\nIndexError: list index out of range\n',)
+
+[2024-06-25 12:29:17,856][flwr][ERROR] - [36mray::DefaultActor.run()[39m (pid=91686, ip=127.0.0.1, actor_id=76629e485dd1842fc560be2901000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x11241e050>)
+  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn
+    trainloader=trainloaders[client_id],
+IndexError: list index out of range
+
+The above exception was the direct cause of the following exception:
+
+[36mray::DefaultActor.run()[39m (pid=91686, ip=127.0.0.1, actor_id=76629e485dd1842fc560be2901000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x11241e050>)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 84, in run
+    raise ClientException(str(message)) from ex
+flwr.simulation.ray_transport.ray_actor.ClientException: 
+>>>>>>>A ClientException occurred.('\n\tSomething went wrong when running your client workload.\n\tClient 89_San Francisco_small crashed when the DefaultActor was running its workload.\n\tException triggered on the client side: Traceback (most recent call last):\n  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 70, in run\n    client = check_clientfn_returns_client(client_fn(cid))\n  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn\n    trainloader=trainloaders[client_id],\nIndexError: list index out of range\n',)
+[2024-06-25 12:29:20,367][flwr][ERROR] - Traceback (most recent call last):
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_client_proxy.py", line 138, in _submit_job
+    res = self.actor_pool.get_client_result(self.cid, timeout)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 414, in get_client_result
+    return self._fetch_future_result(cid)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 300, in _fetch_future_result
+    res_cid, res = ray.get(future)  # type: (str, ClientRes)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/auto_init_hook.py", line 24, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/ray/_private/worker.py", line 2524, in get
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError(ClientException): [36mray::DefaultActor.run()[39m (pid=91688, ip=127.0.0.1, actor_id=37d3ac83c80952c7ead07a5601000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x1074c6080>)
+  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn
+    trainloader=trainloaders[client_id],
+IndexError: list index out of range
+
+The above exception was the direct cause of the following exception:
+
+[36mray::DefaultActor.run()[39m (pid=91688, ip=127.0.0.1, actor_id=37d3ac83c80952c7ead07a5601000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x1074c6080>)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 84, in run
+    raise ClientException(str(message)) from ex
+flwr.simulation.ray_transport.ray_actor.ClientException: 
+>>>>>>>A ClientException occurred.('\n\tSomething went wrong when running your client workload.\n\tClient 90_San Francisco_small crashed when the DefaultActor was running its workload.\n\tException triggered on the client side: Traceback (most recent call last):\n  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 70, in run\n    client = check_clientfn_returns_client(client_fn(cid))\n  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn\n    trainloader=trainloaders[client_id],\nIndexError: list index out of range\n',)
+
+[2024-06-25 12:29:20,367][flwr][ERROR] - [36mray::DefaultActor.run()[39m (pid=91688, ip=127.0.0.1, actor_id=37d3ac83c80952c7ead07a5601000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x1074c6080>)
+  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn
+    trainloader=trainloaders[client_id],
+IndexError: list index out of range
+
+The above exception was the direct cause of the following exception:
+
+[36mray::DefaultActor.run()[39m (pid=91688, ip=127.0.0.1, actor_id=37d3ac83c80952c7ead07a5601000000, repr=<flwr.simulation.ray_transport.ray_actor.DefaultActor object at 0x1074c6080>)
+  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 84, in run
+    raise ClientException(str(message)) from ex
+flwr.simulation.ray_transport.ray_actor.ClientException: 
+>>>>>>>A ClientException occurred.('\n\tSomething went wrong when running your client workload.\n\tClient 90_San Francisco_small crashed when the DefaultActor was running its workload.\n\tException triggered on the client side: Traceback (most recent call last):\n  File "/Users/saisatyajonnalagadda/miniforge3/envs/carbFL/lib/python3.10/site-packages/flwr/simulation/ray_transport/ray_actor.py", line 70, in run\n    client = check_clientfn_returns_client(client_fn(cid))\n  File "/Users/saisatyajonnalagadda/current_projects/carb_aware_model_adaption_FL/main2.py", line 116, in client_fn\n    trainloader=trainloaders[client_id],\nIndexError: list index out of range\n',)
+[2024-06-25 12:29:20,374][flwr][DEBUG] - fit_round 1 received 16 results and 19 failures
+[2024-06-25 12:29:25,693][flwr][WARNING] - No fit_metrics_aggregation_fn provided
+[2024-06-25 12:29:40,222][flwr][INFO] - fit progress: (1, 0.19366842843294144, {'accuracy': 0.317}, 175.1859288340056)
+[2024-06-25 12:29:40,222][flwr][INFO] - evaluate_round 1: no clients selected, cancel
+[2024-06-25 12:29:40,297][flwr][DEBUG] - fit_round 2: strategy sampled 36 clients (out of 100)

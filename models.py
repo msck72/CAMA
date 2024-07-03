@@ -5,9 +5,9 @@ import torch.nn.functional as F
 import copy
 import numpy as np
 
-def create_model(model_rate, model_name, dataset_name, hidden_layers)  :
-    if(dataset_name is 'MNIST'):
-        return conv(model_rate, [1, 28, 28], 10, hidden_layers)
+def create_model(cfg)  :
+    if(cfg.dataset_name is 'MNIST'):
+        return conv(cfg.model_rate, [1, 28, 28], 10, cfg.hidden_layers)
     else:
         raise ValueError("Sorry no dataset_name is known")
     

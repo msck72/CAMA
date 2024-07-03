@@ -14,20 +14,21 @@ import torchvision.transforms as transforms
 from scipy.special import softmax
 from torch.utils.data import Dataset, DataLoader, random_split, SubsetRandomSampler
 from tqdm import tqdm
+from omegaconf import DictConfig
 
-from config import NIID_DATA_SEED
+# from config import NIID_DATA_SEED
 from kwt.utils.dataset import get_loader
 
 ALL_LETTERS = " ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 
 
-def get_dataloaders(dataset: str, num_clients: int, batch_size: int, beta: float):
-    np.random.seed(NIID_DATA_SEED)
-    random.seed(NIID_DATA_SEED)
-    torch.manual_seed(NIID_DATA_SEED)
+def get_dataloaders(dataset: str, num_clients: int, batch_size: int, beta: float, cfg: DictConfig):
+    np.random.seed(cfg.Simulation['NIID_DATA_SEED'])
+    random.seed(cfg.Simulation['NIID_DATA_SEED'])
+    torch.manual_seed(cfg.Simulation['NIID_DATA_SEED'])
     if torch.cuda.is_available():
-        torch.cuda.manual_seed_all(NIID_DATA_SEED)
-    print(f'NIID data seed: {NIID_DATA_SEED}')
+        torch.cuda.manual_seed_all(cfg.Simulation['NIID_DATA_SEED'])
+    print(f'NIID data seed: {cfg.Simulation["NIID_DATA_SEED"]}')
 
     if dataset in ['cifar10', 'cifar100']:
         trainloaders, testloader = load_cifar(dataset.upper(), num_clients, batch_size, beta)

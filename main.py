@@ -19,9 +19,6 @@ import os
 print(os.getcwd())
 print(os.listdir())
 
-
-# from config import NUM_CLIENTS, BATCH_SIZE, CLIENTS_PER_ROUND, MIN_LOCAL_EPOCHS, MAX_LOCAL_EPOCHS, \
-#     MAX_ROUNDS, RAY_CLIENT_RESOURCES, RAY_INIT_ARGS, SAVE_TRAINED_MODELS
 from datasets import get_dataloaders
 from client import flwr_get_parameters, flwr_set_parameters, test, FedZeroClient
 from models import create_model
@@ -115,7 +112,8 @@ def simulate_fl_training(experiment: Experiment, device: torch.device, cfg: Dict
         dataset=experiment.dataset,
         num_clients=cfg.Simulation['NUM_CLIENTS'],
         batch_size=cfg.Simulation['BATCH_SIZE'],
-        beta=experiment.beta
+        beta=experiment.beta,
+        cfg=cfg
     )
 
     print(f"Sample distribution: {pd.Series([len(t.batch_sampler.sampler) for t in trainloaders]).describe()}")
@@ -154,7 +152,7 @@ def simulate_fl_training(experiment: Experiment, device: torch.device, cfg: Dict
    
     
 
-    client_manager = FedZeroCM(experiment.scenario.power_domain_api, experiment.scenario.client_load_api, experiment.scenario)
+    client_manager = FedZeroCM(experiment.scenario.power_domain_api, experiment.scenario.client_load_api, experiment.scenario, cfg)
     
     # rey aajaamam ikkada code marchali ra
     # REY aajaamam modify chestini
@@ -223,7 +221,9 @@ def main(cfg: DictConfig):
     scenario = get_scenario(cfg.Scenario['scenario'],
                             net_arch_size_factor=net_arch_size_factor,
                             forecast_error=cfg.Scenario['forecast_error'],
-                            imbalanced_scenario=cfg.Scenario['imbalanced_scenario'])
+                            imbalanced_scenario=cfg.Scenario['imbalanced_scenario'],
+                            cfg = cfg
+                            )
 
     experiment = Experiment(scenario=scenario,
                             overselect=cfg.Scenario['overselect'],

@@ -4,8 +4,8 @@ from typing import Dict, Optional, List, Union
 
 import pandas as pd
 from vessim.signal import HistoricalSignal
+from omegaconf import DictConfig
 
-from config import BATCH_SIZE, TIMESTEP_IN_MIN
 
 
 class Client:
@@ -20,9 +20,9 @@ class Client:
         self.num_samples = 0.0
         self._statistical_utilities: Dict = {}
 
-    @property
-    def batches_per_epoch(self) -> int:
-        return math.ceil(self.num_samples / BATCH_SIZE)
+    # @property
+    # def batches_per_epoch(self) -> int:
+    #     return math.ceil(self.num_samples / BATCH_SIZE)
 
     def __repr__(self):
         return f"Client({self.name})"
@@ -68,16 +68,16 @@ class ClientLoadApi:
             return list(self._clients.values())
         return [client for client in self._clients.values() if client.zone in zones]
 
-    def actual(self, dt: datetime, client_name: str) -> float:
+    def actual(self, dt: datetime, client_name: str,) -> float:
         """Returns the actual amount of batches than can be computed during the next timestep."""
         if client_name in self._unconstrained:
             return self._clients[client_name].batches_per_timestep
         return (1 - self.signal.at(dt, column=client_name)) * self._clients[client_name].batches_per_timestep
 
-    def forecast(self, now: datetime, duration_in_timesteps: int, client_name: str) -> pd.Series:
+    def forecast(self, now: datetime, duration_in_timesteps: int, client_name: str, cfg: DictConfig) -> pd.Series:
         """Returns the forecasted amount of batches than can be computed during the next timesteps."""
-        forecast = (1 - self.signal.forecast(now, now + timedelta(minutes=TIMESTEP_IN_MIN * duration_in_timesteps),
-                                     column=client_name, frequency=f"{TIMESTEP_IN_MIN}T",
+        forecast = (1 - self.signal.forecast(now, now + timedelta(minutes=cfg.Simulation['TIMESTEP_IN_MIN'] * duration_in_timesteps),
+                                     column=client_name, frequency=f"{cfg.Simulation['TIMESTEP_IN_MIN']}T",
                                      resample_method="bfill")) * self._clients[client_name].batches_per_timestep
         if client_name in self._unconstrained:
             forecast[:] = self._clients[client_name].batches_per_timestep
@@ -98,19 +98,19 @@ class PowerDomainApi:
     def zones(self) -> List[str]:
         return self.signal.columns()
 
-    def actual(self, dt: datetime, zone: str) -> float:
+    def actual(self, dt: datetime, zone: str, cfg: DictConfig) -> float:
         """Returns the actual Ws available during the next timestep."""
         if zone in self._unconstrained:
             return 1000000000000.0
-        return self.signal.at(dt, column=zone) * 60 * TIMESTEP_IN_MIN
+        return self.signal.at(dt, column=zone) * 60 * cfg.Simulation['TIMESTEP_IN_MIN']
     
-    def forecast(self, start_time: datetime, duration_in_timesteps: int, zone: str) -> pd.Series:
+    def forecast(self, start_time: datetime, duration_in_timesteps: int, zone: str, cfg: DictConfig) -> pd.Series:
         """Returns the forecasted Ws available during the next timesteps."""
-        forecast = self.signal.forecast(start_time, start_time + timedelta(minutes=TIMESTEP_IN_MIN * duration_in_timesteps),
-                column=zone, frequency=f"{TIMESTEP_IN_MIN}T", resample_method="bfill")
+        forecast = self.signal.forecast(start_time, start_time + timedelta(minutes=cfg.Simulation['TIMESTEP_IN_MIN'] * duration_in_timesteps),
+                column=zone, frequency=f"{cfg.Simulation['TIMESTEP_IN_MIN']}T", resample_method="bfill")
         
         print('error paina aithe kadu')
-        forecast = ( forecast * 60 * TIMESTEP_IN_MIN)
+        forecast = ( forecast * 60 * cfg.Simulation['TIMESTEP_IN_MIN'])
         if zone in self._unconstrained:
             forecast[:] = 1000000000000.0
         return forecast

@@ -29,6 +29,7 @@ from flwr.server.criterion import Criterion
 from entities import PowerDomainApi, ClientLoadApi, Client
 from datetime import datetime, timedelta
 from scenarios import Scenario
+from omegaconf import DictConfig
 
 import numpy as np
 
@@ -38,12 +39,13 @@ _DURATION = 5
 class FedZeroCM(fl.server.ClientManager):
     """Provides a pool of available clients."""
 
-    def __init__(self, power_domain_api : PowerDomainApi, client_load_api : ClientLoadApi, scenario: Scenario) -> None:
+    def __init__(self, power_domain_api : PowerDomainApi, client_load_api : ClientLoadApi, scenario: Scenario, cfg: DictConfig)-> None:
         self.clients: Dict[str, ClientProxy] = {}
         self._cv = threading.Condition()
         self.power_domain_api = power_domain_api
         self.client_load_api = client_load_api
         self.scenario = scenario
+        self.cfg = cfg
         # self._clients_to_cid = clients_to_cid
 
 
@@ -144,7 +146,7 @@ class FedZeroCM(fl.server.ClientManager):
 
 
         time_now = timedelta(minutes = server_round * 5) + self.scenario.start_date
-        clnts = _filterby_current_capacity_and_energy(self.power_domain_api, self.client_load_api, time_now)
+        clnts = _filterby_current_capacity_and_energy(self.power_domain_api, self.client_load_api, time_now, self.cfg)
 
         # tharavatha excluded clients ni tesesi RAREIII
         # clnts = [client for client in clnts if client not in self.excluded_clients]
@@ -154,7 +156,7 @@ class FedZeroCM(fl.server.ClientManager):
         # Shall change the sort function accordingly
         myclients = sorted(clnts, key = _sort_key, reverse = True)
 
-        filtered_clients = _filterby_forecasted_capacity_and_energy(self.power_domain_api, self.client_load_api, myclients, time_now)
+        filtered_clients = _filterby_forecasted_capacity_and_energy(self.power_domain_api, self.client_load_api, myclients, time_now, self.cfg)
         cids_filtered_clients = self._clients_to_numpy_clients(filtered_clients)
 
 
@@ -200,9 +202,9 @@ class FedZeroCM(fl.server.ClientManager):
 
 def _filterby_current_capacity_and_energy(power_domain_api: PowerDomainApi,
                                           client_load_api: ClientLoadApi,
-                                          now : datetime,
+                                          now : datetime, cfg:DictConfig
                                           ) -> List[Client]:
-    zones_with_energy = [zone for zone in power_domain_api.zones if power_domain_api.actual(now, zone) > 0.0]
+    zones_with_energy = [zone for zone in power_domain_api.zones if power_domain_api.actual(now, zone, cfg) > 0.0]
     clients = [client for client in client_load_api.get_clients(zones_with_energy) if client_load_api.actual(now, client.name) > 0.0]
     print(f"There are {len(clients)} clients available across {len(zones_with_energy)} power domains.")
     return clients
@@ -211,16 +213,16 @@ def _filterby_current_capacity_and_energy(power_domain_api: PowerDomainApi,
 def _filterby_forecasted_capacity_and_energy(power_domain_api: PowerDomainApi,
                                              client_load_api: ClientLoadApi,
                                              clients: List[Client],
-                                             now: datetime) -> List[Client]:
+                                             now: datetime, cfg:DictConfig) -> List[Client]:
     filtered_clients: List[Client] = []
     for client in clients:
         print('error ikkada ?')
-        possible_batches = client_load_api.forecast(now, client_name=client.name, duration_in_timesteps=_DURATION)
+        possible_batches = client_load_api.forecast(now, client_name=client.name, duration_in_timesteps=_DURATION, cfg=cfg)
         print('possible batches')
         print(possible_batches.to_list())
 
         print('leka pothe ikkada? ')
-        ree_powered_batches = power_domain_api.forecast(start_time=now, zone=client.zone, duration_in_timesteps=_DURATION) / client.energy_per_batch
+        ree_powered_batches = power_domain_api.forecast(start_time=now, zone=client.zone, duration_in_timesteps=_DURATION, cfg=cfg) / client.energy_per_batch
         print('ree_powered_batches')
         print(ree_powered_batches.to_list())
         # # Significantly faster than pandas
@@ -231,7 +233,7 @@ def _filterby_forecasted_capacity_and_energy(power_domain_api: PowerDomainApi,
             print('adding')
             filtered_clients.append((client, batches_if_selected))
         print('\n\n')
-        # if total_max_batches >= client.batches_per_epoch * min_epochs:
+        # if total_max_batches >= client.batches_per_epoch(cfg) * min_epochs:
         #     filtered_clients.append(client)
     print(len(filtered_clients))
     print(filtered_clients)

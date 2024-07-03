@@ -1,124 +1,103 @@
-import copy
-import json
-from collections import OrderedDict
-from typing import List
+"""Defines the MNIST Flower Client and a function to instantiate it."""
 
-import numpy as np
+from typing import Callable, Dict, List, Optional, Tuple
+
+import flwr as fl
 import torch
-from flwr.client import NumPyClient
+from flwr.common.typing import NDArrays
+import numpy as np
+import torch.nn.Functional as F
+from utility import get_parameters, set_parameters, make_optimizer
+from models import create_model
 
 
-class FedZeroClient(NumPyClient):
-    def __init__(self, client_name, net, trainloader, optimizer, opt_args, proximal_mu, device):
-        self.client_name = client_name
-        self.net = net
-        self.trainloader = trainloader
-        self.optimizer = optimizer
-        self.opt_args = opt_args
-        self.proximal_mu = proximal_mu
+class FlowerNumPyClient(fl.client.NumPyClient):
+    """Standard Flower client for training."""
+
+    def __init__(
+        self,
+        model_rate: Optional[float] = 1,
+        train_loader = None,
+        test_loader = None,
+        cfg = None,
+        device = torch.device("cpu")
+    ):
+        self.model_rate = model_rate,
+        self.train_loader = train_loader,
+        self.test_loader = test_loader,
+        self.cfg = cfg,
+        self.model = None
         self.device = device
 
-    def get_parameters(self, config):
-        return flwr_get_parameters(self.net)
+    def get_parameters(self, config) -> NDArrays:
+        """Return the parameters of the current net."""
+        return get_parameters(self.model) if self.model is not None else None
 
-    def fit(self, parameters, config):
-        # print(f'Fitting client: {self.client_name}')
-        flwr_set_parameters(self.net, parameters)
-        participation_dict = json.loads(config["participation_dict"])
-        expected_batches = participation_dict[self.client_name]
-        local_round_loss, local_round_acc, statistical_utility = train(
-            self.net, self.trainloader, batches=expected_batches, optimizer=self.optimizer,
-            opt_args=self.opt_args, proximal_mu=self.proximal_mu, device=self.device
+    def fit(self, parameters, config) -> Tuple[NDArrays, int, Dict]:
+        """Implement distributed fit function for a given client."""
+        # print(f"cid = {self.cid}")
+        # create the model here... with the model rate in the config...
+        self.model = create_model(self.cfg)
+        set_parameters(self.model, parameters)
+        train(self.model, self.train_loader, self.label_split, self.cfg)
+        return get_parameters(self.model), len(self.trainloader), {'model_rate': config['model_rate']}
+
+    def evaluate(self, parameters, config) -> Tuple[float, int, Dict]:
+        """Implement distributed evaluation for a given client."""
+        # create the model here... with the model rate in the config...
+        # self.model = create_model(model_rate = config['model_rate], )
+        self.model = create_model(self.cfg)
+        set_parameters(self.model, parameters)
+        loss, accuracy = test(
+            self.model, self.test_loader, device=self.device
         )
-        # print(f'Client {self.client_name} local acc is {local_round_acc}')
-        return flwr_get_parameters(self.net), len(self.trainloader), {'local_loss': local_round_loss,
-                                                                      'local_acc': local_round_acc,
-                                                                      'statistical_utility': statistical_utility}
-
-    def evaluate(self, parameters, config):
-        flwr_set_parameters(self.net, parameters)
-        loss, accuracy = test(self.net, self.trainlloader, self.device)
-        return float(loss), len(self.trainlloader), {"accuracy": float(accuracy)}
+        return float(loss), len(self.test_loader), {"accuracy": float(accuracy)}
 
 
-def flwr_get_parameters(net) -> List[np.ndarray]:
-    return [val.cpu().numpy() for _, val in net.state_dict().items()]
+
+def train(model, train_loader, label_split, settings, device):
+    # criterion = torch.nn.CrossEntropyLoss()
+    optimizer = make_optimizer()
+
+    model.train()
+    for _ in range(settings.epochs):
+        for _, input in enumerate(train_loader):
+            input_dict = {}
+            input_dict["img"] = input[0].to(device)
+            input_dict["label"] = input[1].to(device)
+            input_dict["label_split"] = label_split.type(torch.int).to(device)
+            optimizer.zero_grad()
+            output = model(input_dict)
+            output["loss"].backward()
+            torch.nn.utils.clip_grad_norm_(model.parameters(), 1)
+            optimizer.step()
+    return
 
 
-def flwr_set_parameters(net, parameters: List[np.ndarray]):
-    params_dict = zip(net.state_dict().keys(), parameters)
-    state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
-    try:
-        net.load_state_dict(state_dict, strict=True)
-    except:
-        pass
 
+def test(model, test_loader, label_split = None, device=torch.device("cpu")):
+    model.eval()
+    size = len(test_loader.dataset)
+    num_batches = len(test_loader)
+    test_loss, correct = 0, 0
 
-def train(net, trainloader, batches, optimizer, opt_args, proximal_mu, device):
-    """Train the network on the training set."""
-    # print(f"Client {client_name} starts training")
-    net.train()
-    criterion = torch.nn.CrossEntropyLoss(reduction="none")
-    optimizer = getattr(torch.optim, optimizer)(net.parameters(), **opt_args)
-
-    sample_loss = []
-    local_round_loss, local_round_acc, total = 0.0, 0.0, 0
-    if proximal_mu:
-        global_model_parameters = copy.deepcopy(list(net.parameters()))
-        # for param in net.parameters():
-        #     global_model_parameters.append(copy.deepcopy(param.detach()))
-
-    for i in range(batches):
-        # print(f"Client {client_name}, batch {i}")
-        X, Y = next(iter(trainloader))
-        X, Y = X.to(device), Y.to(device)
-        optimizer.zero_grad()
-        outputs = net(X)
-        individual_sample_loss = criterion(outputs, Y)  # required for Oort statistical utility
-        sample_loss.extend(individual_sample_loss)
-        ce_loss = torch.mean(individual_sample_loss)
-
-        _, predicted = torch.max(outputs.data, 1)
-        total += Y.size(0)
-        local_round_acc += (predicted == Y).sum().item()
-
-        if proximal_mu:
-            tmp_model_parameters = list(net.parameters())
-            proximal_term = sum([torch.sum((global_model_parameters[i]-tmp_model_parameters[i])**2) for i in range(len(global_model_parameters))])
-            proximal_term = (proximal_mu / 2) * proximal_term
-            loss = ce_loss + proximal_term
-        else:
-            loss = ce_loss
-        loss.backward()
-        local_round_loss += loss.item()
-        optimizer.step()
-    
-    local_round_loss /= total
-    local_round_acc /= total
-
-    return local_round_loss, local_round_acc, statistical_utility(sample_loss)
-
-
-def statistical_utility(sample_loss: list):
-    """Statistical utility as defined in Oort"""
-    squared_sum = sum([torch.square(l) for l in sample_loss]).item()
-    return len(sample_loss) * np.sqrt(1/len(sample_loss) * squared_sum)
-
-
-def test(net, testloader, device):
-    """Validate the network on the entire test set."""
-    net.eval()
-    net = net.to(device)
-    criterion = torch.nn.CrossEntropyLoss()
-    loss, accuracy, total = 0, 0, 0.0
     with torch.no_grad():
-        for data in testloader:
-            X, Y = data[0].to(device), data[1].to(device)
-            outputs = net(X)
-            loss += criterion(outputs, Y).item()
-            _, predicted = torch.max(outputs.data, 1)
-            total += Y.size(0)
-            accuracy += (predicted == Y).sum().item()
-    loss /= total
-    accuracy /= total
-    return loss, accuracy
+        model.train(False)
+        for i, input in enumerate(test_loader):
+            input_dict = {}
+            input_dict["img"] = input[0].to(device)
+            input_dict["label"] = input[1].to(device)
+            if label_split != None:
+                input_dict["label_split"] = label_split
+            output = model(input_dict)
+            test_loss += output["loss"].item()
+            correct += (
+                (output["score"].argmax(1) == input_dict["label"])
+                .type(torch.float)
+                .sum()
+                .item()
+            )
+
+    test_loss /= num_batches
+    correct /= size
+    return test_loss, correct

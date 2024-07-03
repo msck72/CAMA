@@ -37,7 +37,7 @@ class FlowerNumPyClient(fl.client.NumPyClient):
         """Implement distributed fit function for a given client."""
         # print(f"cid = {self.cid}")
         # create the model here... with the model rate in the config...
-        # self.model = create_model(model_rate = config['model_rate], )
+        self.model = create_model(self.cfg)
         set_parameters(self.model, parameters)
         train(self.model, self.train_loader, self.label_split, self.cfg)
         return get_parameters(self.model), len(self.trainloader), {'model_rate': config['model_rate']}
@@ -46,6 +46,7 @@ class FlowerNumPyClient(fl.client.NumPyClient):
         """Implement distributed evaluation for a given client."""
         # create the model here... with the model rate in the config...
         # self.model = create_model(model_rate = config['model_rate], )
+        self.model = create_model(self.cfg)
         set_parameters(self.model, parameters)
         loss, accuracy = test(
             self.model, self.test_loader, device=self.device
@@ -54,7 +55,7 @@ class FlowerNumPyClient(fl.client.NumPyClient):
 
 
 
-def train(model, train_loader, label_split, settings):
+def train(model, train_loader, label_split, settings, device):
     # criterion = torch.nn.CrossEntropyLoss()
     optimizer = make_optimizer()
 
@@ -62,9 +63,9 @@ def train(model, train_loader, label_split, settings):
     for _ in range(settings.epochs):
         for _, input in enumerate(train_loader):
             input_dict = {}
-            input_dict["img"] = input[0].to(settings.device)
-            input_dict["label"] = input[1].to(settings.device)
-            input_dict["label_split"] = label_split.type(torch.int).to(settings.device)
+            input_dict["img"] = input[0].to(device)
+            input_dict["label"] = input[1].to(device)
+            input_dict["label_split"] = label_split.type(torch.int).to(device)
             optimizer.zero_grad()
             output = model(input_dict)
             output["loss"].backward()

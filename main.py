@@ -79,8 +79,29 @@ def get_model_and_hyperparameters(dataset, iid):
         else:
             proximal_mu = 0.1
             beta = 0.5
+    elif dataset == "mnist":
+        net_arch = 'mlp'
+        net_arch_size_factor = 1
+        opt_args = {'lr': 0.01, 'weight_decay': 0, 'momentum': 0}
+        if iid:
+            proximal_mu = 0
+            beta = 1
+        else:
+            proximal_mu = 0.1
+            beta = 0.5
+    elif dataset == "femnist":
+        net_arch = 'cnn'
+        net_arch_size_factor = 1
+        opt_args = {'lr': 0.01, 'weight_decay': 0, 'momentum': 0}
+        if iid:
+            proximal_mu = 0
+            beta = 1
+        else:
+            proximal_mu = 0.1
+            beta = 0.5
     else:
         raise ValueError(f"Unknown dataset: {dataset}")
+    
     return net_arch, net_arch_size_factor, optimizer, opt_args, proximal_mu, beta
 
 
@@ -92,8 +113,8 @@ def simulate_fl_training(experiment: Experiment, device: torch.device, cfg: Dict
 
     trainloaders, testloader, num_classes = get_dataloaders(
         dataset=experiment.dataset,
-        num_clients=cfg.NUM_CLIENTS,
-        batch_size=cfg.BATCH_SIZE,
+        num_clients=cfg.Simulation['NUM_CLIENTS'],
+        batch_size=cfg.Simulation['BATCH_SIZE'],
         beta=experiment.beta
     )
 
@@ -104,8 +125,8 @@ def simulate_fl_training(experiment: Experiment, device: torch.device, cfg: Dict
     initial_params = flwr_get_parameters(model)
 
     for i, (c, trainloader) in enumerate(zip(experiment.scenario.client_load_api.get_clients(), trainloaders)):
-        c.num_samples = len(trainloader) * cfg.BATCH_SIZE
-        required_time = c.num_samples / (c.batches_per_timestep * cfg.BATCH_SIZE)
+        c.num_samples = len(trainloader) * cfg.Simulation['BATCH_SIZE']
+        required_time = c.num_samples / (c.batches_per_timestep * cfg.Simulation['TIMESTEP_IN_MIN'])
         # if required_time <= 5 or required_time >= 55:
         print(f"{i+1:>3}: {required_time:.0f} mins ({len(trainloader)} batches at {c.batches_per_timestep:.1f} batches/min)")
 
@@ -125,7 +146,7 @@ def simulate_fl_training(experiment: Experiment, device: torch.device, cfg: Dict
         flwr_set_parameters(net, parameters)  # Update model with the latest parameters
         loss, accuracy = test(net, testloader, device=device)
         net_state_dict = net.state_dict()
-        if cfg.SAVE_TRAINED_MODELS and net_state_dict is not None:
+        if cfg.Simulation['SAVE_TRAINED_MODELS'] and net_state_dict is not None:
             torch.save(net_state_dict, f"trained_models/{experiment.name}/round_{server_round}")
         print(f"Server-side evaluation, round: {server_round},  loss: {loss},  accuracy: {accuracy}")
         return loss, {"accuracy": accuracy}
@@ -139,7 +160,7 @@ def simulate_fl_training(experiment: Experiment, device: torch.device, cfg: Dict
     # REY aajaamam modify chestini
     # Pass parameters to the Strategy for server-side parameter initialization
     strategy = FedZero(
-        fraction_fit=cfg.NUM_CLIENTS / cfg.CLIENTS_PER_ROUND,
+        fraction_fit=cfg.Simulation['NUM_CLIENTS'] / cfg.Simulation['CLIENTS_PER_ROUND'],
         fraction_evaluate=0,  # we only do server side evaluation
         initial_parameters=flwr.common.ndarrays_to_parameters(initial_params),
         evaluate_fn=server_eval_fn
@@ -152,10 +173,10 @@ def simulate_fl_training(experiment: Experiment, device: torch.device, cfg: Dict
         clients_ids=[c.name for c in experiment.scenario.client_load_api.get_clients()],
         client_manager=client_manager,
         strategy=strategy,
-        config=ServerConfig(num_rounds=cfg.MAX_ROUNDS),
+        config=ServerConfig(num_rounds=cfg.Simulation['MAX_ROUNDS']),
         client_resources= {
-            'num_cpus' : 1.0,
-            'num_gpus' : 0.4 if torch.cuda.is_available() else 0
+            'num_cpus' : cfg.RAY_CLIENT_RESOURCES['num_cpus'],
+            'num_gpus' : cfg.RAY_CLIENT_RESOURCES['num_gpus']
         }
     )
     print("Simulation finished successfully.")
@@ -175,16 +196,16 @@ def simulate_fl_training(experiment: Experiment, device: torch.device, cfg: Dict
 
 @hydra.main(config_path="config", config_name="base", version_base=None)
 def main(cfg: DictConfig):
-    assert cfg.overselect >= 1
-    clients_per_round = int(cfg.CLIENTS_PER_ROUND * cfg.overselect)
+    assert cfg.Scenario['overselect'] >= 1
+    clients_per_round = int(cfg.Simulation['CLIENTS_PER_ROUND'] * cfg.Scenario['overselect'])
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print(f"USING DEVICE: {device}")
 
-    net_arch, net_arch_size_factor, optimizer, opt_args, proximal_mu, beta = get_model_and_hyperparameters(cfg.dataset, iid=False)
+    net_arch, net_arch_size_factor, optimizer, opt_args, proximal_mu, beta = get_model_and_hyperparameters(cfg.Scenario['dataset'], iid=False)
 
-    if "fedzero" in cfg.approach:
-        split = cfg.approach.split("_")
+    if "fedzero" in cfg.Scenario['approach']:
+        split = cfg.Scenario['approach'].split("_")
         assert len(split) == 3, ("Invalid approach format: FedZero has the format fedzero_{alpha}_{exclusion_factor}, "
                                  "e.g. fedzero_1_1")
         # selection_strategy = FedZeroSelectionStrategy(
@@ -199,19 +220,19 @@ def main(cfg: DictConfig):
     else:
         raise click.ClickException(f"Unknown approach: {cfg.approach}")
     
-    scenario = get_scenario(cfg.scenario,
+    scenario = get_scenario(cfg.Scenario['scenario'],
                             net_arch_size_factor=net_arch_size_factor,
-                            forecast_error=cfg.forecast_error,
-                            imbalanced_scenario=cfg.imbalanced_scenario)
+                            forecast_error=cfg.Scenario['forecast_error'],
+                            imbalanced_scenario=cfg.Scenario['imbalanced_scenario'])
 
     experiment = Experiment(scenario=scenario,
-                            overselect=cfg.overselect,
+                            overselect=cfg.Scenario['overselect'],
                             net_arch=net_arch,
                             optimizer=optimizer,
                             opt_args=opt_args,
                             beta=beta,
                             proximal_mu=proximal_mu,
-                            dataset=cfg.dataset)
+                            dataset=cfg.Scenario['dataset'])
     simulate_fl_training(experiment, device, cfg)
 
 

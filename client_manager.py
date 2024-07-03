@@ -258,13 +258,13 @@ def _batches_to_class(batches):
     print('batches')
     print(batches)
     if batches <= 10:
-        return 0
+        return 0.0625
     elif batches <= 20:
-        return 1
+        return 0.125
     elif batches <= 30:
-        return 2
+        return 0.25
     elif batches <= 40:
-        return 3
+        return 0.5
     else:
-        return 4
+        return 1
     

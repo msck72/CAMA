@@ -109,9 +109,9 @@ def set_parameters(net, parameters: List[np.ndarray]):
 
 def make_optimizer(cfg, parameters):
     optimizer = None
-    if cfg.optimizer_name == "SGD":
+    if cfg.optim_scheduler.optimizer == "SGD":
         optimizer = torch.optim.SGD(
-            parameters, lr=cfg.learning_rate, momentum=cfg.momentum, weight_decay=cfg.weight_decay
+            parameters, lr=cfg.optim_scheduler.learning_rate, momentum=cfg.optim_scheduler.momentum, weight_decay=cfg.optim_scheduler.weight_decay
         )
     else:
         raise ValueError("Give the right optimizer, LaLaLaaLaa")

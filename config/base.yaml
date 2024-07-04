@@ -10,8 +10,7 @@ Simulation:
   NUM_CLIENTS: 100
   CLIENTS_PER_ROUND: 10
   BATCH_SIZE: 10
-  MIN_LOCAL_EPOCHS: 1
-  MAX_LOCAL_EPOCHS: 5
+  EPOCHS: 5
   SOLAR_SIZE: 800
 
 Scenario:
@@ -25,6 +24,14 @@ Scenario:
   imbalanced_scenario: False
   seed: None
   beta: 0.1
+
+
+optim_scheduler:
+  optimizer: SGD
+  lr: 0.1
+  momentum: 0.9
+  weight_decay: 5.00e-04
+
 
 RAY_CLIENT_RESOURCES:
   num_cpus: 1

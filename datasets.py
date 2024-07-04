@@ -85,6 +85,40 @@ def load_cifar(cifar_type: str, num_clients: int, batch_size: int, beta: float):
     testloader = DataLoader(testset, batch_size=batch_size, shuffle=False)
     return trainloaders, testloader
 
+def load_mnist(num_clients: int, batch_size: int, beta: float):
+    train_transforms = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize((0.1307,), (0.3081,))
+    ])
+    test_transforms = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize((0.1307,), (0.3081,))
+    ])
+    trainset = torchvision.datasets.MNIST(
+        "./data", train=True, download=True, transform=train_transforms
+    )
+    testset = torchvision.datasets.MNIST(
+        "./data", train=False, download=True, transform=test_transforms
+    )
+    trainloaders = []
+    if 0.0 < beta < 1.0:
+        client_to_data_ids = _get_niid_client_data_ids(trainset, num_clients, beta)
+        for client_id in client_to_data_ids:
+            tmp_client_img_ids = client_to_data_ids[client_id]
+            tmp_train_sampler = SubsetRandomSampler(tmp_client_img_ids)
+            _append_to_dataloaders(trainset, batch_size, trainloaders, tmp_train_sampler)
+    else:
+        partition_size = len(trainset) // num_clients
+        lengths = [partition_size] * num_clients
+        datasets = random_split(trainset, lengths, torch.Generator().manual_seed(42))
+        for dataset in datasets:
+            _append_to_dataloaders(dataset, batch_size, trainloaders)
+
+    testloader = DataLoader(testset, batch_size=batch_size, shuffle=False)
+    return trainloaders, testloader 
+
+
+
 
 def load_shakespeare(train_data_dir, test_data_dir, batch_size=10):
     """Loading 100 clients (== speakers) from the Shakespeare dataset"""

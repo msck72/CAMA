@@ -2,7 +2,7 @@
 Simulation:
   NIID_DATA_SEED: 42
   SAVE_TRAINED_MODELS: False
-  TIMESTEP_IN_MIN: 1000
+  TIMESTEP_IN_MIN: 10
   MAX_ROUND_IN_MIN: 60
   MAX_ROUNDS: 10
   MAX_TIME_IN_DAYS: 7
@@ -33,6 +33,3 @@ RAY_CLIENT_RESOURCES:
 RAY_INIT_ARGS:
   ignore_reinit_error: True
   include_dashboard: False
-
-
-

@@ -6,7 +6,7 @@ import flwr as fl
 import torch
 from flwr.common.typing import NDArrays
 import numpy as np
-import torch.nn.Functional as F
+import torch.nn.functional as F
 from utility import get_parameters, set_parameters, make_optimizer
 from models import create_model
 

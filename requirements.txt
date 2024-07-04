@@ -4,3 +4,4 @@ gurobipy
 audiomentations
 einops
 gurobipy==10.0.0
+hydra-core

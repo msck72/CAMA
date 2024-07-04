@@ -14,13 +14,14 @@ import hydra
 from omegaconf import DictConfig, OmegaConf
 import pickle
 from pathlib import Path
+from utility import get_parameters, set_parameters
 
 import os
 print(os.getcwd())
 print(os.listdir())
 
 from datasets import get_dataloaders
-from client import flwr_get_parameters, flwr_set_parameters, test, FedZeroClient
+from client import test, FlowerNumPyClient
 from models import create_model
 from scenarios import get_scenario, Scenario
 from utility import StaticJudge, StatUtilityJudge
@@ -41,10 +42,7 @@ class Experiment:
 
     @property
     def name(self):
-        if self.proximal_mu:
-            aggregation_strategy = f"FedProx_{self.proximal_mu}"
-        else:
-            aggregation_strategy = "FedAvg"
+        aggregation_strategy = "FedAvg"
         iid_str = "noniid" if self.beta is None else f"b={self.beta:.1f}"
         scenario_str = "no_constr" if self.scenario.unconstrained else self.scenario.solar_scenario
         imbalanced_str = "_imbalanced" if self.scenario.imbalanced_scenario else ""
@@ -119,8 +117,8 @@ def simulate_fl_training(experiment: Experiment, device: torch.device, cfg: Dict
     print(f"Sample distribution: {pd.Series([len(t.batch_sampler.sampler) for t in trainloaders]).describe()}")
 
     # Initialize 1 model for initial params
-    model = create_model(model_arch=experiment.net_arch, num_classes=num_classes, device=device)
-    initial_params = flwr_get_parameters(model)
+    model = create_model(cfg=cfg.Scenario, model_rate=1, device=device)
+    initial_params = get_parameters(model)
 
     for i, (c, trainloader) in enumerate(zip(experiment.scenario.client_load_api.get_clients(), trainloaders)):
         c.num_samples = len(trainloader) * cfg.Simulation['BATCH_SIZE']
@@ -130,7 +128,7 @@ def simulate_fl_training(experiment: Experiment, device: torch.device, cfg: Dict
 
     def client_fn(client_name) -> NumPyClient:
         client_id = int(client_name.split('_')[0])
-        return FedZeroClient(client_name=client_name,
+        return FlowerNumPyClient(client_name=client_name,
                                 net=model,
                                 trainloader=trainloaders[client_id],
                                 optimizer=experiment.optimizer,
@@ -140,8 +138,8 @@ def simulate_fl_training(experiment: Experiment, device: torch.device, cfg: Dict
 
     # The `evaluate` function will be by Flower called after every round
     def server_eval_fn(server_round: int, parameters: flwr.common.NDArrays, config: Dict[str, flwr.common.Scalar]):
-        net = create_model(model_arch=experiment.net_arch, num_classes=num_classes, device=device)
-        flwr_set_parameters(net, parameters)  # Update model with the latest parameters
+        net = create_model(cfg=cfg.Scenario, model_rate=1, device=device)
+        set_parameters(net, parameters)  # Update model with the latest parameters
         loss, accuracy = test(net, testloader, device=device)
         net_state_dict = net.state_dict()
         if cfg.Simulation['SAVE_TRAINED_MODELS'] and net_state_dict is not None:
@@ -150,7 +148,8 @@ def simulate_fl_training(experiment: Experiment, device: torch.device, cfg: Dict
         return loss, {"accuracy": accuracy}
 
    
-    
+    model_rates = [1, 0.5, 0.25, 0.125, 0.0625]
+    client_to_param_index = {i: create_model(cfg, i).state_dict().items() for i in model_rates}
 
     client_manager = FedZeroCM(experiment.scenario.power_domain_api, experiment.scenario.client_load_api, experiment.scenario, cfg)
     
@@ -158,6 +157,7 @@ def simulate_fl_training(experiment: Experiment, device: torch.device, cfg: Dict
     # REY aajaamam modify chestini
     # Pass parameters to the Strategy for server-side parameter initialization
     strategy = FedZero(
+        client_to_param_index=client_to_param_index,
         fraction_fit=cfg.Simulation['NUM_CLIENTS'] / cfg.Simulation['CLIENTS_PER_ROUND'],
         fraction_evaluate=0,  # we only do server side evaluation
         initial_parameters=flwr.common.ndarrays_to_parameters(initial_params),

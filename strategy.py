@@ -6,6 +6,7 @@ Paper: arxiv.org/abs/1602.05629
 
 from logging import WARNING
 from typing import Callable, Dict, List, Optional, Tuple, Union
+from models import copy_gp_to_lp
 
 from flwr.common import (
     EvaluateIns,
@@ -79,6 +80,7 @@ class FedZero(Strategy):
     def __init__(
         self,
         *,
+        client_to_param_index,
         fraction_fit: float = 1.0,
         fraction_evaluate: float = 1.0,
         min_fit_clients: int = 2,
@@ -105,6 +107,8 @@ class FedZero(Strategy):
             or min_evaluate_clients > min_available_clients
         ):
             log(WARNING, WARNING_MIN_AVAILABLE_CLIENTS_TOO_LOW)
+
+        self.client_to_param_index = client_to_param_index
 
         self.fraction_fit = fraction_fit
         self.fraction_evaluate = fraction_evaluate
@@ -178,8 +182,9 @@ class FedZero(Strategy):
         final_list_of_clients = []
         for client in clients:
             print(client.properties)
+            client_parameters = copy_gp_to_lp(parameters, self.client_to_param_index[client.properties['model_rate']])
             # fit_ins = adapted_model_parameters(client, parameters)
-            final_list_of_clients.append((client, fit_ins))
+            final_list_of_clients.append((client, FitIns(client_parameters, config)))
         # Return client/config pairs
         # return [(client, fit_ins) for client in clients]
         return final_list_of_clients

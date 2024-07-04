@@ -3,4 +3,5 @@ vessim==0.4.0
 # gurobipy
 audiomentations
 einops
-gurobipy
+gurobipy==10.0.0
+hydra-core

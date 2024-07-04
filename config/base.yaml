@@ -16,7 +16,9 @@ Simulation:
 
 Scenario:
   scenario: "global"
-  dataset: "cifar10"
+  dataset: "MNIST"
+  model: "conv"
+  hidden_layers: [64, 128, 256, 256]
   approach: "fedzero_0_1"
   overselect: 1
   forecast_error: "error"

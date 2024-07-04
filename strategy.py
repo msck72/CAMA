@@ -173,7 +173,7 @@ class FedZero(Strategy):
         if self.on_fit_config_fn is not None:
             # Custom fit config function provided
             config = self.on_fit_config_fn(server_round)
-        fit_ins = FitIns(parameters, config)
+        # fit_ins = FitIns(parameters, config)
 
         # Sample clients
         sample_size, min_num_clients = self.num_fit_clients(
@@ -190,7 +190,8 @@ class FedZero(Strategy):
             print(client.properties)
             client_parameters = copy_gp_to_lp(global_param_with_sd, self.client_to_param_index[client.properties['model_rate']])
             # fit_ins = adapted_model_parameters(client, parameters)
-            final_list_of_clients.append((client, FitIns(client_parameters, config)))
+            local_param_fitres = [v.cpu() for v in client_parameters.values()]
+            final_list_of_clients.append((client, FitIns(ndarrays_to_parameters(local_param_fitres), client.properties)))
         # Return client/config pairs
         # return [(client, fit_ins) for client in clients]
         return final_list_of_clients

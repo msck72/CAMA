@@ -1,17 +1,3 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# ==============================================================================
 """Federated Averaging (FedAvg) [McMahan et al., 2016] strategy.
 
 Paper: arxiv.org/abs/1602.05629
@@ -37,7 +23,7 @@ from flwr.common.logger import log
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 
-from flwr.server.strategy.aggregate import aggregate, aggregate_inplace, weighted_loss_avg
+from flwr.server.strategy.aggregate import aggregate, weighted_loss_avg
 from flwr.server.strategy import Strategy
 
 
@@ -179,7 +165,7 @@ class FedZero(Strategy):
         if self.on_fit_config_fn is not None:
             # Custom fit config function provided
             config = self.on_fit_config_fn(server_round)
-        # fit_ins = FitIns(parameters, config)
+        fit_ins = FitIns(parameters, config)
 
         # Sample clients
         sample_size, min_num_clients = self.num_fit_clients(
@@ -192,7 +178,7 @@ class FedZero(Strategy):
         final_list_of_clients = []
         for client in clients:
             print(client.properties)
-            fit_ins = adapted_model_parameters(client, parameters)
+            # fit_ins = adapted_model_parameters(client, parameters)
             final_list_of_clients.append((client, fit_ins))
         # Return client/config pairs
         # return [(client, fit_ins) for client in clients]
@@ -220,8 +206,6 @@ class FedZero(Strategy):
         clients = client_manager.sample(
             num_clients=sample_size, min_num_clients=min_num_clients,
         )
-
-        # Ha Ha Ha 
         # here we need to define the classes it belongs to and its properties accordingly
         # write a loop (for every client selected get its capacity and return the adapted model)
         # Return client/config pairs
@@ -241,7 +225,7 @@ class FedZero(Strategy):
         if not self.accept_failures and failures:
             return None, {}
 
-        if self.inplace:
+        if False:
             # Does in-place weighted average of results
             aggregated_ndarrays = aggregate_inplace(results)
         else:

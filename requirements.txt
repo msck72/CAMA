@@ -1,6 +1,6 @@
 flwr[simulation]==1.6.0
 vessim==0.4.0
-gurobipy
+# gurobipy
 audiomentations
 einops
-gurobipy==10.0.0
+gurobipy

@@ -38,8 +38,10 @@ from flwr.common.logger import log
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 
-from flwr.server.strategy.aggregate import aggregate, aggregate_inplace, weighted_loss_avg
+from flwr.server.strategy.aggregate import aggregate, weighted_loss_avg
 from flwr.server.strategy import Strategy
+
+from models import get_state_dict_from_param
 
 
 WARNING_MIN_AVAILABLE_CLIENTS_TOO_LOW = """
@@ -95,6 +97,7 @@ class FedZero(Strategy):
         self,
         *,
         client_to_param_index,
+        model,
         fraction_fit: float = 1.0,
         fraction_evaluate: float = 1.0,
         min_fit_clients: int = 2,
@@ -123,6 +126,7 @@ class FedZero(Strategy):
             log(WARNING, WARNING_MIN_AVAILABLE_CLIENTS_TOO_LOW)
 
         self.client_to_param_index = client_to_param_index
+        self.model = model
 
         self.fraction_fit = fraction_fit
         self.fraction_evaluate = fraction_evaluate
@@ -193,10 +197,12 @@ class FedZero(Strategy):
             num_clients=sample_size, min_num_clients=min_num_clients, server_round=server_round
         )
 
+        global_param_with_sd = get_state_dict_from_param(self.model, parameters)
+
         final_list_of_clients = []
         for client in clients:
             print(client.properties)
-            client_parameters = copy_gp_to_lp(parameters, self.client_to_param_index[client.properties['model_rate']])
+            client_parameters = copy_gp_to_lp(global_param_with_sd, self.client_to_param_index[client.properties['model_rate']])
             # fit_ins = adapted_model_parameters(client, parameters)
             final_list_of_clients.append((client, FitIns(client_parameters, config)))
         # Return client/config pairs
@@ -246,7 +252,7 @@ class FedZero(Strategy):
         if not self.accept_failures and failures:
             return None, {}
 
-        if self.inplace:
+        if False:
             # Does in-place weighted average of results
             aggregated_ndarrays = aggregate_inplace(results)
         else:

@@ -1,7 +1,9 @@
 from abc import ABC, abstractmethod
 from collections import defaultdict
 from typing import Dict, List
-
+from typing import List, OrderedDict
+import torch
+import numpy as np
 from entities import Client
 
 
@@ -89,3 +91,28 @@ class StatUtilityJudge(UtilityJudge):
             except ZeroDivisionError:
                 weighting[client] = 1
         return weighting
+    
+
+
+
+def get_parameters(net) -> List[np.ndarray]:
+    """Return the parameters of model as numpy.NDArrays."""
+    return [val.cpu().numpy() for _, val in net.state_dict().items()]
+
+
+def set_parameters(net, parameters: List[np.ndarray]):
+    """Set the model parameters with given parameters."""
+    params_dict = zip(net.state_dict().keys(), parameters)
+    state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
+    net.load_state_dict(state_dict, strict=True)
+
+
+def make_optimizer(cfg, parameters):
+    optimizer = None
+    if cfg.optimizer_name == "SGD":
+        optimizer = torch.optim.SGD(
+            parameters, lr=cfg.learning_rate, momentum=cfg.momentum, weight_decay=cfg.weight_decay
+        )
+    else:
+        raise ValueError("Give the right optimizer, LaLaLaaLaa")
+    return optimizer

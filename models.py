@@ -4,11 +4,13 @@ import torchvision
 import torch.nn.functional as F
 import copy
 import numpy as np
+from flwr.common import parameters_to_ndarrays
 
-def create_model(cfg, model_rate)  :
+
+def create_model(cfg, model_rate, device= torch.device('cpu'))  :
     print('model being created')
-    if(cfg.dataset is 'MNIST'):
-        return conv(model_rate, [1, 28, 28], 10, cfg.hidden_layers)
+    if(cfg.dataset == 'mnist'):
+        return conv(model_rate, [1, 28, 28], 10, cfg.hidden_layers, device)
     else:
         raise ValueError("Sorry no dataset_name is known")
     
@@ -106,3 +108,15 @@ def conv(
     hidden_size = [int(np.ceil(model_rate * x)) for x in hidden_layers]
     model = Conv(hidden_size=hidden_size, data_shape=data_shape, classes_size=classes_size)
     return model.to(device)
+
+
+
+def get_state_dict_from_param(model, parameters):
+    # Load the parameters into the model
+    for param_tensor, param_ndarray in zip(
+        model.state_dict(), parameters_to_ndarrays(parameters)
+    ):
+        model.state_dict()[param_tensor].copy_(torch.from_numpy(param_ndarray))
+    # Step 3: Obtain the state_dict of the model
+    state_dict = model.state_dict()
+    return state_dict

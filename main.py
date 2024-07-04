@@ -149,7 +149,7 @@ def simulate_fl_training(experiment: Experiment, device: torch.device, cfg: Dict
 
    
     model_rates = [1, 0.5, 0.25, 0.125, 0.0625]
-    client_to_param_index = {i: create_model(cfg, i).state_dict().items() for i in model_rates}
+    client_to_param_index = {i: create_model(cfg.Scenario, i).state_dict().items() for i in model_rates}
 
     client_manager = FedZeroCM(experiment.scenario.power_domain_api, experiment.scenario.client_load_api, experiment.scenario, cfg)
     
@@ -158,6 +158,7 @@ def simulate_fl_training(experiment: Experiment, device: torch.device, cfg: Dict
     # Pass parameters to the Strategy for server-side parameter initialization
     strategy = FedZero(
         client_to_param_index=client_to_param_index,
+        model = create_model(cfg.Scenario, model_rate = 1),
         fraction_fit=cfg.Simulation['NUM_CLIENTS'] / cfg.Simulation['CLIENTS_PER_ROUND'],
         fraction_evaluate=0,  # we only do server side evaluation
         initial_parameters=flwr.common.ndarrays_to_parameters(initial_params),

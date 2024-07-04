@@ -162,7 +162,7 @@ class FedZeroCM(fl.server.ClientManager):
 
         filtered_client_proxies = []
         for cpr, model_size in cids_filtered_clients:
-            cpr.properties['model_size'] = model_size
+            cpr.properties['model_rate'] = model_size
             filtered_client_proxies.append(cpr)
         
         # return [self.clients[cid] for cid, model_size in cids_filtered_clients]

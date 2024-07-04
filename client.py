@@ -37,7 +37,7 @@ class FlowerNumPyClient(fl.client.NumPyClient):
         """Implement distributed fit function for a given client."""
         # print(f"cid = {self.cid}")
         # create the model here... with the model rate in the config...
-        self.model = create_model(self.cfg)
+        self.model = create_model(self.cfg, model_rate=config['model_rate'])
         set_parameters(self.model, parameters)
         train(self.model, self.train_loader, self.label_split, self.cfg)
         return get_parameters(self.model), len(self.trainloader), {'model_rate': config['model_rate']}
@@ -46,7 +46,7 @@ class FlowerNumPyClient(fl.client.NumPyClient):
         """Implement distributed evaluation for a given client."""
         # create the model here... with the model rate in the config...
         # self.model = create_model(model_rate = config['model_rate], )
-        self.model = create_model(self.cfg)
+        self.model = create_model(self.cfg, model_rate=config['model_rate'])
         set_parameters(self.model, parameters)
         loss, accuracy = test(
             self.model, self.test_loader, device=self.device

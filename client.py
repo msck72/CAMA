@@ -16,13 +16,13 @@ class FlowerNumPyClient(fl.client.NumPyClient):
 
     def __init__(
         self,
-        model_rate: Optional[float] = 1,
-        train_loader = None,
+        client_name,
+        train_loader,
         test_loader = None,
         cfg = None,
         device = torch.device("cpu")
     ):
-        self.model_rate = model_rate,
+        print(f'I am client {client_name}')
         self.train_loader = train_loader,
         self.test_loader = test_loader,
         self.cfg = cfg,
@@ -60,7 +60,7 @@ def train(model, train_loader, label_split, settings, device):
     optimizer = make_optimizer()
 
     model.train()
-    for _ in range(settings.epochs):
+    for _ in range(settings.EPOCHS):
         for _, input in enumerate(train_loader):
             input_dict = {}
             input_dict["img"] = input[0].to(device)

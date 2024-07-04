@@ -129,11 +129,8 @@ def simulate_fl_training(experiment: Experiment, device: torch.device, cfg: Dict
     def client_fn(client_name) -> NumPyClient:
         client_id = int(client_name.split('_')[0])
         return FlowerNumPyClient(client_name=client_name,
-                                net=model,
-                                trainloader=trainloaders[client_id],
-                                optimizer=experiment.optimizer,
-                                opt_args=experiment.opt_args,
-                                proximal_mu=experiment.proximal_mu,
+                                train_loader=trainloaders[client_id],
+                                cfg=cfg,
                                 device=device)
 
     # The `evaluate` function will be by Flower called after every round
@@ -149,7 +146,7 @@ def simulate_fl_training(experiment: Experiment, device: torch.device, cfg: Dict
 
    
     model_rates = [1, 0.5, 0.25, 0.125, 0.0625]
-    client_to_param_index = {i: create_model(cfg.Scenario, i).state_dict().items() for i in model_rates}
+    client_to_param_index = {i: [v.shape for _, v in create_model(cfg.Scenario, i).state_dict().items()] for i in model_rates}
 
     client_manager = FedZeroCM(experiment.scenario.power_domain_api, experiment.scenario.client_load_api, experiment.scenario, cfg)
     

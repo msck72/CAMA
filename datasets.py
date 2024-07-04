@@ -30,7 +30,10 @@ def get_dataloaders(dataset: str, num_clients: int, batch_size: int, beta: float
         torch.cuda.manual_seed_all(cfg.Simulation['NIID_DATA_SEED'])
     print(f'NIID data seed: {cfg.Simulation["NIID_DATA_SEED"]}')
 
-    if dataset in ['cifar10', 'cifar100']:
+    if dataset == 'mnist':
+        trainloaders, testloader = load_mnist(num_clients, batch_size, beta)
+        num_classes = len(np.unique(testloader.dataset.targets))
+    elif dataset in ['cifar10', 'cifar100']:
         trainloaders, testloader = load_cifar(dataset.upper(), num_clients, batch_size, beta)
         num_classes = len(np.unique(testloader.dataset.targets))
     elif dataset == 'shakespeare':

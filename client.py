@@ -29,6 +29,14 @@ class FlowerNumPyClient(fl.client.NumPyClient):
         self.model = None
         self.device = device
 
+
+        all_labels = []
+        for batch in self.train_loader:
+            _, labels = batch
+            all_labels.extend(labels.numpy())  # Convert tensors to numpy arrays and extend the list
+
+        self.label_split = torch.Tensor(list(set(all_labels)))
+
     def get_parameters(self, config) -> NDArrays:
         """Return the parameters of the current net."""
         return get_parameters(self.model) if self.model is not None else None
@@ -37,7 +45,7 @@ class FlowerNumPyClient(fl.client.NumPyClient):
         """Implement distributed fit function for a given client."""
         # print(f"cid = {self.cid}")
         # create the model here... with the model rate in the config...
-        self.model = create_model(self.cfg, model_rate=config['model_rate'])
+        self.model = create_model(self.cfg.Scenario, model_rate=config['model_rate'])
         set_parameters(self.model, parameters)
         train(self.model, self.train_loader, self.label_split, self.cfg)
         return get_parameters(self.model), len(self.trainloader), {'model_rate': config['model_rate']}
@@ -46,7 +54,7 @@ class FlowerNumPyClient(fl.client.NumPyClient):
         """Implement distributed evaluation for a given client."""
         # create the model here... with the model rate in the config...
         # self.model = create_model(model_rate = config['model_rate], )
-        self.model = create_model(self.cfg, model_rate=config['model_rate'])
+        self.model = create_model(self.cfg.Scenario, model_rate=config['model_rate'])
         set_parameters(self.model, parameters)
         loss, accuracy = test(
             self.model, self.test_loader, device=self.device

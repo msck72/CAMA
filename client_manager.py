@@ -150,11 +150,6 @@ class FedZeroCM(fl.server.ClientManager):
         time_now = timedelta(minutes = server_round * 5) + self.scenario.start_date
         clnts = _filterby_current_capacity_and_energy(self.power_domain_api, self.client_load_api, time_now, self.cfg)
 
-        # tharavatha excluded clients ni tesesi RAREIII
-        # clnts = [client for client in clnts if client not in self.excluded_clients]
-
-        
-        # Kattappa eeda code marchalne
         # Shall change the sort function accordingly
         myclients = sorted(clnts, key = _sort_key, reverse = True)
 
@@ -169,33 +164,11 @@ class FedZeroCM(fl.server.ClientManager):
             cpr.properties['model_rate'] = model_size
             filtered_client_proxies.append(cpr)
         
-        # return [self.clients[cid] for cid, model_size in cids_filtered_clients]
-        return filtered_client_proxies
+        return filtered_client_proxies[:10]
 
-        # self.wait_for(min_num_clients)
-        # # Sample clients which meet the criterion
-        # available_cids = list(self.clients)
-        # if criterion is not None:
-        #     available_cids = [
-        #         cid for cid in available_cids if criterion.select(self.clients[cid])
-        #     ]
-
-        # if num_clients > len(available_cids):
-        #     log(
-        #         INFO,
-        #         "Sampling failed: number of available clients"
-        #         " (%s) is less than number of requested clients (%s).",
-        #         len(available_cids),
-        #         num_clients,
-        #     )
-        #     return []
-
-        # sampled_cids = random.sample(available_cids, num_clients)
-        # return [self.clients[cid] for cid in sampled_cids]
 
     def _clients_to_numpy_clients(self, clients):
-        # print("Gemini Ganesan client manager clients to numpy clients")
-        # print('length = ', len(self.clients))
+
         cids = []
         for clnt, batches in clients:
             cids.append((self.clients[clnt.name], _batches_to_class(batches)))
@@ -220,27 +193,17 @@ def _filterby_forecasted_capacity_and_energy(power_domain_api: PowerDomainApi,
                                              now: datetime, cfg:DictConfig) -> List[Client]:
     filtered_clients: List[Client] = []
     for client in clients:
-        # print('error ikkada ?')
         possible_batches = client_load_api.forecast(now, client_name=client.name, duration_in_timesteps=_DURATION, cfg=cfg)
-        # print('possible batches')
-        # print(possible_batches.to_list())
 
-        # print('leka pothe ikkada? ')
         ree_powered_batches = power_domain_api.forecast(start_time=now, zone=client.zone, duration_in_timesteps=_DURATION, cfg=cfg) / client.energy_per_batch
-        # print('ree_powered_batches')
-        # print(ree_powered_batches.to_list())
-        # # Significantly faster than pandas
+
         to_select, batches_if_selected = _has_more_resources_in_future(possible_batches, ree_powered_batches)
         if to_select:
             print('not adding')
         else:
-            # print('adding')
             filtered_clients.append((client, batches_if_selected))
-        print('\n\n')
-        # if total_max_batches >= client.batches_per_epoch(cfg) * min_epochs:
-        #     filtered_clients.append(client)
-    # print(len(filtered_clients))
-    # print(filtered_clients)
+    print("clients untayi ra Chariiiii")
+    print(filtered_clients[:10])
 
     return filtered_clients
 
@@ -254,14 +217,11 @@ def _has_more_resources_in_future(possible_batches, ree_powered_batches):
     total_max_batches = np.max(np.minimum(possible_batches.values, ree_powered_batches.values))
     
     batches_if_selected = min(possible_batches.to_list()[0], ree_powered_batches.to_list()[0])
-    # print('total max batches')
-    # print(total_max_batches)
+
     return (False,batches_if_selected) if (total_max_batches == batches_if_selected) else (True, 0)
 
 def _batches_to_class(batches):
-    # categorise the batches into classes based on number of batches
-    #print all the batches
-    # print('batches')
+
     print(batches)
     if batches <= 10:
         return 0.0625

@@ -47,7 +47,7 @@ class FlowerNumPyClient(fl.client.NumPyClient):
         self.model = create_model(self.cfg.Scenario, model_rate=config['model_rate'])
         set_parameters(self.model, parameters)
         train(self.model, self.train_loader, self.label_split, self.cfg, self.device )
-        return get_parameters(self.model), len(self.train_loader), {'model_rate': config['model_rate']}
+        return get_parameters(self.model), len(self.train_loader), {'model_rate': config['model_rate'], 'label_split': self.label_split}
 
     def evaluate(self, parameters, config) -> Tuple[float, int, Dict]:
         """Implement distributed evaluation for a given client."""

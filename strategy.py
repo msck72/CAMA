@@ -7,6 +7,9 @@ Paper: arxiv.org/abs/1602.05629
 from logging import WARNING
 from typing import Callable, Dict, List, Optional, Tuple, Union
 from models import copy_gp_to_lp
+import numpy as np
+import copy
+import torch
 
 from flwr.common import (
     EvaluateIns,
@@ -231,34 +234,156 @@ class FedZero(Strategy):
         failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """Aggregate fit results using weighted average."""
-        if not results:
-            return None, {}
-        # Do not aggregate if there are failures and failures are not accepted
-        if not self.accept_failures and failures:
-            return None, {}
+        print(f'In Aggregate Tiger Nageswara rao and number of client proxys = {len(results)}')
 
-        if False:
-            # Does in-place weighted average of results
-            aggregated_ndarrays = aggregate_inplace(results)
-        else:
-            # Convert results
-            weights_results = [
-                (parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
-                for _, fit_res in results
-            ]
-            aggregated_ndarrays = aggregate(weights_results)
+        def aggregate_layer(layer_updates):
+            # print("in aggregate in-between layers")
+            """Padding layers with 0 to max size, then average them"""
+            # Get the layer's largest form
+            max_ch = np.max([np.shape(l) for l in layer_updates], axis=0)
+            layer_agg = np.zeros(max_ch)
+            count_layer = np.zeros(max_ch)  # to average by num of models that size
+            for l in layer_updates:
+                local_ch = np.shape(l)
+                pad_shape = [(0, a) for a in (max_ch - local_ch)]
+                l_padded = np.pad(l, pad_shape, constant_values=0.0)
+                ones_of_shape = np.ones(local_ch)
+                ones_pad = np.pad(ones_of_shape, pad_shape, constant_values=0.0)
+                count_layer = np.add(count_layer, ones_pad)
+                layer_agg = np.add(layer_agg, l_padded)
+            if np.any(count_layer == 0.0):
+                print(count_layer)
+                raise ValueError("Diving with 0")
+            layer_agg = layer_agg / count_layer
+            return layer_agg
 
-        parameters_aggregated = ndarrays_to_parameters(aggregated_ndarrays)
 
-        # Aggregate custom metrics if aggregation fn was provided
-        metrics_aggregated = {}
-        if self.fit_metrics_aggregation_fn:
-            fit_metrics = [(res.num_examples, res.metrics) for _, res in results]
-            metrics_aggregated = self.fit_metrics_aggregation_fn(fit_metrics)
-        elif server_round == 1:  # Only log this warning once
-            log(WARNING, "No fit_metrics_aggregation_fn provided")
+        def aggregate_layer_weight(layer_updates):
+            # print("in aggregate in-between layers")
+            """Padding layers with 0 to max size, then average them"""
+            # Get the layer's largest form
+            max_ch = np.max([np.shape(l) for l in layer_updates], axis=0)
+            layer_agg = np.zeros(max_ch)
+            count_layer = np.zeros(max_ch)  # to average by num of models that size
+            for m , l in enumerate(layer_updates):              
+                local_ch = np.shape(l)
+                pad_shape = [(0, a) for a in (max_ch - local_ch)]
+                l_padded = np.pad(l, pad_shape, constant_values=0.0)
+                
+                ones_of_shape = np.ones(local_ch) 
+                ones_pad = np.pad(ones_of_shape, pad_shape, constant_values=0.0)
+                count_layer = np.add(count_layer, ones_pad)
+                layer_agg = np.add(layer_agg, l_padded)
+            count_layer[count_layer == 0] = 1
+            if np.any(count_layer == 0.0):
+                print(count_layer)
+                raise ValueError("Diving with 0")
+            layer_agg = layer_agg / count_layer
+            # print(f'aggregated layer = {layer_agg}')
+            return layer_agg
 
-        return parameters_aggregated, metrics_aggregated
+        
+        def aggregate_last_layer(layer_updates, label_split):
+            # print('in aggregate last layer')
+            """Padding layers with 0 to max size, then average them"""
+            # Get the layer's largest form
+            max_ch = np.max([np.shape(l) for l in layer_updates], axis=0)
+            layer_agg = np.zeros(max_ch)
+            count_layer = np.zeros(max_ch)  # to average by num of models that size
+            for m , l in enumerate(layer_updates):
+                local_ch = np.shape(l)
+                label_mask = np.zeros(local_ch)
+                label_mask[label_split[m].type(torch.int).numpy()] = 1
+                l = l * label_mask
+                ones_of_shape = np.ones(local_ch)
+                ones_of_shape =  ones_of_shape * label_mask
+                count_layer = np.add(count_layer, ones_of_shape)
+                layer_agg = np.add(layer_agg, l)
+            count_layer[count_layer == 0] = 1
+            if np.any(count_layer == 0.0):
+                raise ValueError("Diving with 0")
+            layer_agg = layer_agg / count_layer
+            return layer_agg
+
+        # Create a list of weights, each multiplied by the related number of examples
+        weighted_weights = [
+            [layer for layer in parameters_to_ndarrays(fit_res.parameters)] for _ , fit_res in results
+        ]
+
+        global_values = []
+        for v in self.model.state_dict().values():
+            global_values.append(copy.deepcopy(v))
+
+        num_layers = len(weighted_weights[0])
+
+        label_split = [fit_res.metrics['label_split'].type(torch.int) for _, fit_res in results]
+
+        flat_label_split = torch.cat([t.view(-1) for t in label_split])
+        unique_labels = torch.unique(flat_label_split)
+        all_labels = torch.arange(10)
+        missing_labels = torch.tensor(list(set(all_labels.tolist()) - set(unique_labels.tolist())))
+        print(f'missing labels = {missing_labels}')
+
+
+        agg_layers = []
+        last_weight_layer = [None for i in range(10)]
+        for i, l in enumerate(zip(*weighted_weights), start=1):
+            if( i == num_layers - 1):
+                
+                for i in range(10):
+                    agg_layer_list = []
+                    for clnt , layer in enumerate(l):
+                        if(torch.any(label_split[clnt] == i)):
+                            agg_layer_list.append(layer[i])
+                    if len(agg_layer_list) != 0:
+                        last_weight_layer[i] = (aggregate_layer_weight(agg_layer_list))
+                        # pad with prev.
+            elif(i == num_layers):
+                store_prev = {}
+                
+                for k in missing_labels:
+                    k = k.item()
+                    store_prev[k] = global_values[-1][k]
+                
+                global_values[-1] = torch.from_numpy((aggregate_last_layer(l , label_split)))
+                
+                for k in missing_labels:
+                    k = k.item()
+                    global_values[-1][k] = store_prev[k]
+            else:
+                agg_layers.append(aggregate_layer(l))
+        
+
+
+        # keep the rest of global parameters as it is
+        for i , layer in enumerate(agg_layers):
+            layer = torch.from_numpy(layer)
+            layer_shape = layer.shape
+            slices = [slice(0, dim) for dim in layer_shape]
+            global_values[i][slices] = layer
+        
+        for i , inner_layer in enumerate(last_weight_layer):
+
+            if(inner_layer is None):
+                continue
+            
+            inner_layer = torch.from_numpy(inner_layer)
+            inner_layer_shape = inner_layer.shape
+            slices = [slice(0, dim) for dim in inner_layer_shape]
+            global_values[num_layers - 2][i][:inner_layer_shape[0]] = inner_layer
+
+        
+        new_state_dict = {}
+        for i , k in enumerate(self.model.state_dict().keys()):
+            new_state_dict[k] = global_values[i]
+        self.model.load_state_dict(new_state_dict)
+        
+
+        for i in range(len(global_values)):
+            global_values[i] = global_values[i].numpy()
+
+
+        return ndarrays_to_parameters(global_values) , {}
 
     def aggregate_evaluate(
         self,

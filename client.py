@@ -12,8 +12,6 @@ from models import create_model
 
 
 class FlowerNumPyClient(fl.client.NumPyClient):
-    """Standard Flower client for training."""
-
     def __init__(
         self,
         client_name,
@@ -23,17 +21,18 @@ class FlowerNumPyClient(fl.client.NumPyClient):
         device = torch.device("cpu")
     ):
         print(f'I am client {client_name}')
-        self.train_loader = train_loader,
-        self.test_loader = test_loader,
-        self.cfg = cfg,
+        self.train_loader = train_loader
+        self.test_loader = test_loader
+        self.cfg = cfg
         self.model = None
         self.device = device
 
-
         all_labels = []
         for batch in self.train_loader:
-            _, labels = batch
-            all_labels.extend(labels.numpy())  # Convert tensors to numpy arrays and extend the list
+            # Assuming batch is a tuple (input, labels)
+            # If it's a different structure, adjust accordingly
+            labels = batch[1]
+            all_labels.extend(labels.numpy())
 
         self.label_split = torch.Tensor(list(set(all_labels)))
 
@@ -47,8 +46,8 @@ class FlowerNumPyClient(fl.client.NumPyClient):
         # create the model here... with the model rate in the config...
         self.model = create_model(self.cfg.Scenario, model_rate=config['model_rate'])
         set_parameters(self.model, parameters)
-        train(self.model, self.train_loader, self.label_split, self.cfg)
-        return get_parameters(self.model), len(self.trainloader), {'model_rate': config['model_rate']}
+        train(self.model, self.train_loader, self.label_split, self.cfg, self.device )
+        return get_parameters(self.model), len(self.train_loader), {'model_rate': config['model_rate']}
 
     def evaluate(self, parameters, config) -> Tuple[float, int, Dict]:
         """Implement distributed evaluation for a given client."""
@@ -65,10 +64,10 @@ class FlowerNumPyClient(fl.client.NumPyClient):
 
 def train(model, train_loader, label_split, settings, device):
     # criterion = torch.nn.CrossEntropyLoss()
-    optimizer = make_optimizer()
+    optimizer = make_optimizer(settings, model.parameters())
 
     model.train()
-    for _ in range(settings.EPOCHS):
+    for _ in range(settings.Simulation['EPOCHS']):
         for _, input in enumerate(train_loader):
             input_dict = {}
             input_dict["img"] = input[0].to(device)

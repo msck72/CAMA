@@ -19,6 +19,7 @@ import random
 import threading
 from logging import INFO
 from typing import Dict, List, Optional
+import copy
 
 import flwr as fl
 import torch
@@ -46,6 +47,7 @@ class FedZeroCM(fl.server.ClientManager):
         self.client_load_api = client_load_api
         self.scenario = scenario
         self.cfg = cfg
+        self.excluded_clients = []
         # self._clients_to_cid = clients_to_cid
 
 
@@ -157,6 +159,8 @@ class FedZeroCM(fl.server.ClientManager):
         myclients = sorted(clnts, key = _sort_key, reverse = True)
 
         filtered_clients = _filterby_forecasted_capacity_and_energy(self.power_domain_api, self.client_load_api, myclients, time_now, self.cfg)
+        filtered_clients = _update_excluded_clients(filtered_clients, self.excluded_clients, self.cfg)
+        self.excluded_clients = copy.deep_copy(filtered_clients)
         cids_filtered_clients = self._clients_to_numpy_clients(filtered_clients)
 
 
@@ -190,8 +194,8 @@ class FedZeroCM(fl.server.ClientManager):
         # return [self.clients[cid] for cid in sampled_cids]
 
     def _clients_to_numpy_clients(self, clients):
-        print("Gemini Ganesan client manager clients to numpy clients")
-        print('length = ', len(self.clients))
+        # print("Gemini Ganesan client manager clients to numpy clients")
+        # print('length = ', len(self.clients))
         cids = []
         for clnt, batches in clients:
             cids.append((self.clients[clnt.name], _batches_to_class(batches)))
@@ -216,27 +220,27 @@ def _filterby_forecasted_capacity_and_energy(power_domain_api: PowerDomainApi,
                                              now: datetime, cfg:DictConfig) -> List[Client]:
     filtered_clients: List[Client] = []
     for client in clients:
-        print('error ikkada ?')
+        # print('error ikkada ?')
         possible_batches = client_load_api.forecast(now, client_name=client.name, duration_in_timesteps=_DURATION, cfg=cfg)
-        print('possible batches')
-        print(possible_batches.to_list())
+        # print('possible batches')
+        # print(possible_batches.to_list())
 
-        print('leka pothe ikkada? ')
+        # print('leka pothe ikkada? ')
         ree_powered_batches = power_domain_api.forecast(start_time=now, zone=client.zone, duration_in_timesteps=_DURATION, cfg=cfg) / client.energy_per_batch
-        print('ree_powered_batches')
-        print(ree_powered_batches.to_list())
+        # print('ree_powered_batches')
+        # print(ree_powered_batches.to_list())
         # # Significantly faster than pandas
         to_select, batches_if_selected = _has_more_resources_in_future(possible_batches, ree_powered_batches)
         if to_select:
             print('not adding')
         else:
-            print('adding')
+            # print('adding')
             filtered_clients.append((client, batches_if_selected))
         print('\n\n')
         # if total_max_batches >= client.batches_per_epoch(cfg) * min_epochs:
         #     filtered_clients.append(client)
-    print(len(filtered_clients))
-    print(filtered_clients)
+    # print(len(filtered_clients))
+    # print(filtered_clients)
 
     return filtered_clients
 
@@ -246,18 +250,18 @@ def _sort_key(client):
 
 
 def _has_more_resources_in_future(possible_batches, ree_powered_batches):
-    print('minimum ')
+    # print('minimum ')
     total_max_batches = np.max(np.minimum(possible_batches.values, ree_powered_batches.values))
     
     batches_if_selected = min(possible_batches.to_list()[0], ree_powered_batches.to_list()[0])
-    print('total max batches')
-    print(total_max_batches)
+    # print('total max batches')
+    # print(total_max_batches)
     return (False,batches_if_selected) if (total_max_batches == batches_if_selected) else (True, 0)
 
 def _batches_to_class(batches):
     # categorise the batches into classes based on number of batches
     #print all the batches
-    print('batches')
+    # print('batches')
     print(batches)
     if batches <= 10:
         return 0.0625
@@ -269,4 +273,16 @@ def _batches_to_class(batches):
         return 0.5
     else:
         return 1
+
+
+
+def _update_excluded_clients(clients, excluded_clients, cfg):
+    updated_clients = []
+    for client in clients:
+        if client not in excluded_clients:
+            updated_clients.append(client)
+    return updated_clients
+
+
+
     

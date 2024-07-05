@@ -109,7 +109,6 @@ class PowerDomainApi:
         forecast = self.signal.forecast(start_time, start_time + timedelta(minutes=cfg.Simulation['TIMESTEP_IN_MIN'] * duration_in_timesteps),
                 column=zone, frequency=f"{cfg.Simulation['TIMESTEP_IN_MIN']}T", resample_method="bfill")
         
-        print('error paina aithe kadu')
         forecast = ( forecast * 60 * cfg.Simulation['TIMESTEP_IN_MIN'])
         if zone in self._unconstrained:
             forecast[:] = 1000000000000.0

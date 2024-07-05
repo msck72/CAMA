@@ -11,6 +11,8 @@ def create_model(cfg, model_rate, device= torch.device('cpu'))  :
     print('model being created')
     if(cfg.dataset == 'mnist'):
         return conv(model_rate, [1, 28, 28], 10, cfg.hidden_layers, device)
+    elif(cfg.dataset == 'cifar10'):
+        return conv(model_rate, [3, 32, 32], 10, cfg.hidden_layers, device)
     else:
         raise ValueError("Sorry no dataset_name is known")
     

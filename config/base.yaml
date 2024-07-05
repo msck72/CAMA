@@ -15,7 +15,7 @@ Simulation:
 
 Scenario:
   scenario: "global"
-  dataset: "mnist"
+  dataset: "cifar10"
   model: "conv"
   hidden_layers: [64, 128, 256, 256]
   approach: "fedzero_0_1"

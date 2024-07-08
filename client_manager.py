@@ -154,8 +154,8 @@ class FedZeroCM(fl.server.ClientManager):
         myclients = sorted(clnts, key = _sort_key, reverse = True)
 
         filtered_clients = _filterby_forecasted_capacity_and_energy(self.power_domain_api, self.client_load_api, myclients, time_now, self.cfg)
-        filtered_clients = _update_excluded_clients(filtered_clients, self.excluded_clients, self.cfg)
-        self.excluded_clients = copy.deep_copy(filtered_clients)
+        filtered_clients, self.excluded_clients = _update_excluded_clients(filtered_clients, self.excluded_clients, self.cfg)
+        # self.excluded_clients = copy.deep_copy(filtered_clients)
         cids_filtered_clients = self._clients_to_numpy_clients(filtered_clients)
 
 
@@ -202,8 +202,8 @@ def _filterby_forecasted_capacity_and_energy(power_domain_api: PowerDomainApi,
             print('not adding')
         else:
             filtered_clients.append((client, batches_if_selected))
-    print("clients untayi ra Chariiiii")
-    print(filtered_clients[:10])
+    # print("clients untayi ra Chariiiii")
+    # print(filtered_clients[:10])
 
     return filtered_clients
 
@@ -237,12 +237,16 @@ def _batches_to_class(batches):
 
 
 def _update_excluded_clients(clients, excluded_clients, cfg):
+
     updated_clients = []
+    updated_excluded_clients = []
+
     for client in clients:
-        if client not in excluded_clients:
+        if client[0].name not in excluded_clients:
             updated_clients.append(client)
-    return updated_clients
-
-
-
-    
+            updated_excluded_clients.append(client[0].name)
+    print("Samajavaragamana ninnu choosi aagagaluna!!!!")
+    print('updated_clients = ', updated_clients)
+    print()
+    print('updated_excluded_clients = ', updated_excluded_clients)
+    return updated_clients, updated_excluded_clients

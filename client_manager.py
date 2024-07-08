@@ -240,11 +240,15 @@ def _update_excluded_clients(clients, excluded_clients, cfg):
 
     updated_clients = []
     updated_excluded_clients = []
-
+    num_of_clients_selected = 0
     for client in clients:
+        if num_of_clients_selected > 10:
+            break
         if client[0].name not in excluded_clients:
             updated_clients.append(client)
             updated_excluded_clients.append(client[0].name)
+            num_of_clients_selected += 1
+
     print("Samajavaragamana ninnu choosi aagagaluna!!!!")
     print('updated_clients = ', updated_clients)
     print()

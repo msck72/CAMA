@@ -46,6 +46,9 @@ class FedZeroCM(fl.server.ClientManager):
         self.excluded_clients = []
         self.rng = np.random.default_rng(seed= cfg.Scenario.seed)
         self.client_selection_history = {}
+        self.cycle_start = None
+        self.cycle_active_clients = set()
+        self.cycle_participation_mean = 0
         # self._clients_to_cid = clients_to_cid
 
 
@@ -143,14 +146,35 @@ class FedZeroCM(fl.server.ClientManager):
         if min_num_clients is None:
             min_num_clients = num_clients
 
+        TRANSITION_PERIOD_H = 12
+        now = timedelta(minutes=server_round * 1000) + self.scenario.start_date
+        wallah = self.cycle_participation_mean
+        if self.cycle_start is None:
+            self.cycle_start = now
+        elif self.cycle_start + timedelta(hours=24) <= now:
+            self.cycle_start = now
+            self.cycle_participation_mean = np.mean([c.participated_rounds for c in self.cycle_active_clients])
+            self.cycle_active_clients = set()
+            print(f"############################################################")
+            print(f"### NEW CYCLE! MEAN: {self.cycle_participation_mean} ###")
+            print(f"############################################################")
+        elif self.cycle_start + timedelta(hours=24 - TRANSITION_PERIOD_H) <= now:
+            current_mean = np.mean([c.participated_rounds for c in self.cycle_active_clients])
+            factor = (now - (self.cycle_start + timedelta(hours=24 - TRANSITION_PERIOD_H))).seconds / 3600 / TRANSITION_PERIOD_H
+            wallah = self.cycle_participation_mean + (current_mean - self.cycle_participation_mean) * factor
+            print(f"Cycle mean: {self.cycle_participation_mean:.2f}, Current mean: {current_mean:.2f} factor: {factor}, result: {wallah} ###")
+
+
         time_now = timedelta(minutes=server_round * 1000) + self.scenario.start_date
         clnts = _filterby_current_capacity_and_energy(self.power_domain_api, self.client_load_api, time_now, self.cfg)
 
         myclients = sorted(clnts, key=_sort_key, reverse=True)
 
         filtered_clients = _filterby_forecasted_capacity_and_energy(self.power_domain_api, self.client_load_api, myclients, time_now, self.cfg)
-        filtered_clients, self.excluded_clients = _update_excluded_clients(filtered_clients, self.excluded_clients, self.cfg, server_round)
 
+        # Update cycle_active_clients
+        self.cycle_active_clients.update(client for client, _ in filtered_clients)
+        filtered_clients, self.excluded_clients = _update_excluded_clients(filtered_clients, self.excluded_clients, self.cfg, server_round, wallah)
         cids_filtered_clients = self._clients_to_numpy_clients(filtered_clients)
 
         filtered_client_proxies = []
@@ -233,7 +257,7 @@ def _batches_to_class(batches):
     else:
         return 1
 
-def _update_excluded_clients(clients: List[Tuple[Client, float]], excluded_clients: List[str], cfg: DictConfig, server_round: int) -> Tuple[List[Tuple[Client, float]], List[str]]:
+def _update_excluded_clients(clients: List[Tuple[Client, float]], excluded_clients: List[str], cfg: DictConfig, server_round: int, wallah: float) -> Tuple[List[Tuple[Client, float]], List[str]]:
     alpha = cfg.client_selection.alpha
     exclusion_factor = cfg.client_selection.exclusion_factor
     rng = np.random.default_rng(seed=cfg.Scenario.seed)
@@ -256,7 +280,11 @@ def _update_excluded_clients(clients: List[Tuple[Client, float]], excluded_clien
         client = next((c for c, _ in clients if c.name == client_name), None)
         if client:
             if client.participated_in_last_round(server_round):
-                probability = min(alpha * 1 / client.participated_rounds, 1) if client.participated_rounds > 0 else 1
+                participated_rounds = client.participated_rounds - wallah
+                if participated_rounds > 0:
+                    probability = min(alpha * 1 / participated_rounds, 1)
+                else:
+                    probability = 1
                 if rng.random() <= probability:
                     clients_to_remove.append(client_name)
 

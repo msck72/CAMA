@@ -1,4 +1,3 @@
----
 Simulation:
   NIID_DATA_SEED: 42
   SAVE_TRAINED_MODELS: False
@@ -15,23 +14,25 @@ Simulation:
 
 Scenario:
   scenario: "global"
-  dataset: "cifar10"
+  dataset: "mnist"
   model: "conv"
   hidden_layers: [64, 128, 256, 256]
   approach: "fedzero_0_1"
   overselect: 1
   forecast_error: "error"
   imbalanced_scenario: False
-  seed: None
+  seed: 42  # Added seed for reproducibility
   beta: 0.1
 
+client_selection:  # New section for client selection parameters
+  alpha: 0.1  # Adjust this value as needed
+  exclusion_factor: 0.2  # Adjust this value as needed
 
 optim_scheduler:
   optimizer: SGD
   lr: 0.1
   momentum: 0.9
   weight_decay: 5.00e-04
-
 
 RAY_CLIENT_RESOURCES:
   num_cpus: 1

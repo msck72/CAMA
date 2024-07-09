@@ -6,23 +6,17 @@ import pandas as pd
 from vessim.signal import HistoricalSignal
 from omegaconf import DictConfig
 
-
-
 class Client:
     def __init__(self, name: str, zone: str, batches_per_timestep: float, energy_per_batch: float):
         self.name = name
         self.zone = zone
         self.batches_per_timestep = batches_per_timestep
-        self.energy_per_batch = energy_per_batch # Ws
+        self.energy_per_batch = energy_per_batch  # Ws
 
         self.participated_rounds = 0
         self.participated_batches = 0
         self.num_samples = 0.0
-        self._statistical_utilities: Dict = {}
-
-    # @property
-    # def batches_per_epoch(self) -> int:
-    #     return math.ceil(self.num_samples / BATCH_SIZE)
+        self._statistical_utilities: Dict[int, float] = {}
 
     def __repr__(self):
         return f"Client({self.name})"
@@ -40,15 +34,14 @@ class Client:
 
     def statistical_utility(self) -> float:
         if len(self._statistical_utilities) == 0:
-            return (self.num_samples)  # by convention (copied from the original Oort code)
+            return self.num_samples  # by convention (copied from the original Oort code)
         return list(self._statistical_utilities.values())[-1]
 
-    def participated_in_last_round(self, round_number) -> bool:
+    def participated_in_last_round(self, round_number: int) -> bool:
         try:
             return list(self._statistical_utilities.keys())[-1] == round_number - 1
         except IndexError:
             return False
-
 
 class ClientLoadApi:
     def __init__(self, clients: List[Client], signal: HistoricalSignal, unconstrained: Union[bool, List[str]] = False):
@@ -63,7 +56,7 @@ class ClientLoadApi:
         self.signal = signal
 
     def get_clients(self, zones: Optional[List[str]] = None) -> List[Client]:
-        """Returs the names of clients present in one of the zones as list."""
+        """Returns the names of clients present in one of the zones as list."""
         if zones is None:
             return list(self._clients.values())
         return [client for client in self._clients.values() if client.zone in zones]
@@ -82,7 +75,6 @@ class ClientLoadApi:
         if client_name in self._unconstrained:
             forecast[:] = self._clients[client_name].batches_per_timestep
         return forecast
-
 
 class PowerDomainApi:
     def __init__(self, signal: HistoricalSignal, unconstrained: Union[bool, List[str]] = False):
@@ -109,7 +101,7 @@ class PowerDomainApi:
         forecast = self.signal.forecast(start_time, start_time + timedelta(minutes=cfg.Simulation['TIMESTEP_IN_MIN'] * duration_in_timesteps),
                 column=zone, frequency=f"{cfg.Simulation['TIMESTEP_IN_MIN']}T", resample_method="bfill")
         
-        forecast = ( forecast * 60 * cfg.Simulation['TIMESTEP_IN_MIN'])
+        forecast = (forecast * 60 * cfg.Simulation['TIMESTEP_IN_MIN'])
         if zone in self._unconstrained:
             forecast[:] = 1000000000000.0
         return forecast

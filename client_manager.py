@@ -150,7 +150,7 @@ class FedZeroCM(fl.server.ClientManager):
             min_num_clients = num_clients
 
         TRANSITION_PERIOD_H = 12
-        now = timedelta(minutes=server_round * 1000) + self.scenario.start_date
+        now = timedelta(minutes=server_round * 100) + self.scenario.start_date
         wallah = self.cycle_participation_mean
         if self.cycle_start is None:
             self.cycle_start = now
@@ -168,7 +168,7 @@ class FedZeroCM(fl.server.ClientManager):
             print(f"Cycle mean: {self.cycle_participation_mean:.2f}, Current mean: {current_mean:.2f} factor: {factor}, result: {wallah} ###")
 
 
-        time_now = timedelta(minutes=server_round * 1000) + self.scenario.start_date
+        time_now = timedelta(minutes=server_round * 100) + self.scenario.start_date
         clnts = _filterby_current_capacity_and_energy(self.power_domain_api, self.client_load_api, time_now, self.cfg)
 
         # myclients = sorted(clnts, key=_sort_key, reverse=True)

@@ -49,6 +49,9 @@ class FedZeroCM(fl.server.ClientManager):
         self.cycle_start = None
         self.cycle_active_clients = set()
         self.cycle_participation_mean = 0
+
+        all_clients = self.client_load_api.get_clients()
+        # self.client_history = {client : {'weighted_p_c' : 0, } for client in all_clients}
         # self._clients_to_cid = clients_to_cid
 
 
@@ -168,13 +171,17 @@ class FedZeroCM(fl.server.ClientManager):
         time_now = timedelta(minutes=server_round * 1000) + self.scenario.start_date
         clnts = _filterby_current_capacity_and_energy(self.power_domain_api, self.client_load_api, time_now, self.cfg)
 
-        myclients = sorted(clnts, key=_sort_key, reverse=True)
+        # myclients = sorted(clnts, key=_sort_key, reverse=True)
 
-        filtered_clients = _filterby_forecasted_capacity_and_energy(self.power_domain_api, self.client_load_api, myclients, time_now, self.cfg)
+        filtered_clients = _filterby_forecasted_capacity_and_energy(self.power_domain_api, self.client_load_api, clnts, time_now, self.cfg)
 
         # Update cycle_active_clients
         self.cycle_active_clients.update(client for client, _ in filtered_clients)
         filtered_clients, self.excluded_clients = _update_excluded_clients(filtered_clients, self.excluded_clients, self.cfg, server_round, wallah)
+        
+        for client, batches_to_compute in filtered_clients:
+            client.record_usage(batches_to_compute, _batches_to_class(batches_to_compute))
+
         cids_filtered_clients = self._clients_to_numpy_clients(filtered_clients)
 
         filtered_client_proxies = []
@@ -235,10 +242,12 @@ def _filterby_forecasted_capacity_and_energy(power_domain_api: PowerDomainApi,
         to_select, batches_if_selected = _has_more_resources_in_future(possible_batches, ree_powered_batches)
         if not to_select:
             filtered_clients.append((client, batches_if_selected))
+    filtered_clients = sorted(filtered_clients, key=_sort_key)
     return filtered_clients
 
 def _sort_key(client):
-    return client.batches_per_timestep * client.energy_per_batch
+    # return client.batches_per_timestep * client.energy_per_batch
+    return client[1]
 
 def _has_more_resources_in_future(possible_batches, ree_powered_batches):
     total_max_batches = np.max(np.minimum(possible_batches.values, ree_powered_batches.values))
@@ -280,7 +289,7 @@ def _update_excluded_clients(clients: List[Tuple[Client, float]], excluded_clien
         client = next((c for c, _ in clients if c.name == client_name), None)
         if client:
             if client.participated_in_last_round(server_round):
-                participated_rounds = client.participated_rounds - wallah
+                participated_rounds = client.weighted_count - wallah
                 if participated_rounds > 0:
                     probability = min(alpha * 1 / participated_rounds, 1)
                 else:

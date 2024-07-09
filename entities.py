@@ -17,6 +17,7 @@ class Client:
         self.participated_batches = 0
         self.num_samples = 0.0
         self._statistical_utilities: Dict[int, float] = {}
+        self.weighted_count = 0
 
     def __repr__(self):
         return f"Client({self.name})"
@@ -24,10 +25,11 @@ class Client:
     def __lt__(self, other):  # Sortable as we use instances of this class for DataFrame indexing
         return self.name < other.name 
 
-    def record_usage(self, computed_batches: int) -> None:
+    def record_usage(self, computed_batches: int, model_size_used) -> None:
         if computed_batches > 0:
             self.participated_rounds += 1
             self.participated_batches += computed_batches
+            self.weighted_count += model_size_used
 
     def record_statistical_utility(self, server_round: int, utility: float) -> None:
         self._statistical_utilities[server_round] = utility

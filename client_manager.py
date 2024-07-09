@@ -183,6 +183,8 @@ class FedZeroCM(fl.server.ClientManager):
             filtered_client_proxies.append(cpr)
         
         selected_clients = filtered_client_proxies[:num_clients]
+        if (len(selected_clients) >= self.cfg.Simulation.CLIENTS_PER_ROUND):
+            selected_clients = selected_clients[:self.cfg.Simulation.CLIENTS_PER_ROUND]
 
         # Update selection history
         for client in selected_clients:

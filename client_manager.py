@@ -185,10 +185,11 @@ class FedZeroCM(fl.server.ClientManager):
         
         self.time_now += timedelta(minutes=random.randint(10, 60))
         
+        filtered_clients = filtered_clients[:num_clients]
         carbon_footprint_till_now = 0
         for client, batches_to_compute in filtered_clients:
-            client.record_usage(batches_to_compute, _batches_to_class(batches_to_compute))
-            carbon_footprint_till_now += client.carbon_footprint
+            carbon_footprint_till_now += client.record_usage(batches_to_compute, _batches_to_class(batches_to_compute))
+            # carbon_footprint_till_now += client.carbon_footprint
             client.record_statistical_utility(server_round, 1000)
 
         print(f"carbon_footprint till now ({server_round}) = ",  carbon_footprint_till_now)
@@ -199,7 +200,7 @@ class FedZeroCM(fl.server.ClientManager):
             cpr.properties['model_rate'] = model_size
             filtered_client_proxies.append(cpr)
         
-        selected_clients = filtered_client_proxies[:num_clients]
+        # selected_clients = filtered_client_proxies[:num_clients]
         if (len(selected_clients) >= self.cfg.Simulation.CLIENTS_PER_ROUND):
             selected_clients = selected_clients[:self.cfg.Simulation.CLIENTS_PER_ROUND]
 

@@ -35,7 +35,7 @@ class Client:
             self.participated_rounds += 1
             self.participated_batches += computed_batches
             self.weighted_participated_rounds += model_size_used
-            self.carbon_footprint += self.energy_per_batch * computed_batches * model_size_used
+            return self.energy_per_batch * computed_batches * model_size_used
 
     def record_statistical_utility(self, server_round: int, utility: float) -> None:
         self._statistical_utilities[server_round] = utility

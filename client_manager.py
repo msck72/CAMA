@@ -160,13 +160,13 @@ class FedZeroCM(fl.server.ClientManager):
             self.cycle_start = self.time_now
         elif self.cycle_start + timedelta(hours=24) <= self.time_now:
             self.cycle_start = self.time_now
-            self.cycle_participation_mean = np.mean([c.participated_rounds for c in self.cycle_active_clients])
+            self.cycle_participation_mean = np.mean([c.weighted_participated_rounds for c in self.cycle_active_clients])
             self.cycle_active_clients = set()
             print(f"############################################################")
             print(f"### NEW CYCLE! MEAN: {self.cycle_participation_mean} ###")
             print(f"############################################################")
         elif self.cycle_start + timedelta(hours=24 - TRANSITION_PERIOD_H) <= self.time_now:
-            current_mean = np.mean([c.participated_rounds for c in self.cycle_active_clients])
+            current_mean = np.mean([c.weighted_participated_rounds for c in self.cycle_active_clients])
             factor = (self.time_now - (self.cycle_start + timedelta(hours=24 - TRANSITION_PERIOD_H))).seconds / 3600 / TRANSITION_PERIOD_H
             wallah = self.cycle_participation_mean + (current_mean - self.cycle_participation_mean) * factor
             print(f"Cycle mean: {self.cycle_participation_mean:.2f}, Current mean: {current_mean:.2f} factor: {factor}, result: {wallah} ###")
@@ -185,10 +185,13 @@ class FedZeroCM(fl.server.ClientManager):
         
         self.time_now += timedelta(minutes=random.randint(10, 60))
         
+        carbon_footprint_till_now = 0
         for client, batches_to_compute in filtered_clients:
             client.record_usage(batches_to_compute, _batches_to_class(batches_to_compute))
+            carbon_footprint_till_now += client.carbon_footprint
             client.record_statistical_utility(server_round, 1000)
 
+        print(f"carbon_footprint till now ({server_round}) = ",  carbon_footprint_till_now)
         cids_filtered_clients = self._clients_to_numpy_clients(filtered_clients)
 
         filtered_client_proxies = []

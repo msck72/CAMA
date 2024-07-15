@@ -183,7 +183,7 @@ class FedZeroCM(fl.server.ClientManager):
 
         filtered_clients = _filterby_forecasted_capacity_and_energy(self.power_domain_api, self.client_load_api, clnts, self.time_now, self.cfg)
         
-        self.time_now += timedelta(minutes=15)
+        self.time_now += timedelta(minutes=random.randint(10, 60))
         
         for client, batches_to_compute in filtered_clients:
             client.record_usage(batches_to_compute, _batches_to_class(batches_to_compute))
@@ -238,21 +238,40 @@ class FedZeroCM(fl.server.ClientManager):
         rng = np.random.default_rng(seed=self.cfg.Scenario.seed)
 
         # participants = [client for client in clients if client.name not in excluded_clients]
+        print("Yemito ivalla rekkalu vachinattu")
+        is_participated = [client.participated_in_last_round(round_number) for client in clients]
+        # for client in clients:
+        #     print(f'client name = {client.name}', client.participated_in_last_round(round_number))
         participants = {client for client in clients if client.participated_in_last_round(round_number)}
+
+        
 
         if not participants:
             return clients
+        
+        print(f"| Participants: {len(participants)}")
+
+        print("\n\n")
+        print("Nippu Raaaaa")
+        print(self.excluded_clients)
 
         # Calculate utility threshold
         utility_threshold = np.quantile([client.statistical_utility() for client in participants], exclusion_factor)
+        print("Comeback Indian")
+        print(f"| Utility threshold: {utility_threshold:.2f} (quantile {exclusion_factor})")
 
         # Exclude clients below threshold
         newly_excluded = [client for client in participants if client.statistical_utility() <= utility_threshold]
+        print("\n\nHoyya Hoyya Neetho gadipay gadiya.....")
+        print(len(participants))
+        print(len(newly_excluded))
+        print(newly_excluded)
+        print("\n\n")
         self.excluded_clients.extend(newly_excluded)
 
         print(f"| Excluded clients after add: {len(self.excluded_clients)}")
         for i, client in enumerate(self.excluded_clients):
-            participated_rounds = client.participated_rounds - wallah
+            participated_rounds = client.weighted_participated_rounds - wallah
             if participated_rounds > 0:
                 probability = min(alpha * 1 / participated_rounds, 1)
             else:
@@ -267,7 +286,15 @@ class FedZeroCM(fl.server.ClientManager):
                 print("")
         print(f"| Excluded clients after remove: {len(self.excluded_clients)}")
         print("----------------------------------------------")
+        # create a txt file and append the excluded clients
+        with open("filtered_clients.txt", "a") as f:
+            f.write(f'current capacity Clients = {str(clients)}\n')
+            f.write(f"Is_participated = {is_participated}\n")
+            f.write(f"Participants in current round  = {participants}\n")
+            f.write(f"number of excluded clients {len(self.excluded_clients)}\n")
+            f.write(f"Excluded clients: {self.excluded_clients}\n")
 
+        
         # Filter clients based on updated exclusion list
         # updated_clients = [client for client in clients if client.name not in self.excluded_clients]
 
@@ -286,15 +313,74 @@ def _filterby_forecasted_capacity_and_energy(power_domain_api: PowerDomainApi,
                                              client_load_api: ClientLoadApi,
                                              clients: List[Client],
                                              now: datetime, cfg: DictConfig) -> List[Tuple[Client, float]]:
+    print("Manasa nuvvu unde chote cheppamma")
+    print(clients)
+    print("\n\n")
     filtered_clients: List[Tuple[Client, float]] = []
+    to_print = []
+
     for client in clients:
         possible_batches = client_load_api.forecast(now, client_name=client.name, duration_in_timesteps=_DURATION, cfg=cfg)
         ree_powered_batches = power_domain_api.forecast(start_time=now, zone=client.zone, duration_in_timesteps=_DURATION, cfg=cfg) / client.energy_per_batch
         to_select, batches_if_selected = _has_more_resources_in_future(possible_batches, ree_powered_batches)
         if not to_select:
             filtered_clients.append((client, batches_if_selected))
+            to_print.append(client)
     filtered_clients = sorted(filtered_clients, key=_sort_key, reverse=True)
+
+    # append the filtered clients to filtered_clients.txt file
+    # with open("filtered_clients.txt", "a") as f:
+    #     f.write(f"Round {now} - Filtered clients: {filtered_clients}\n")
+
+    with open("filtered_clients.txt", "a") as f:
+        f.write(f"clients after removing excluded clients {str(clients)}\n")
+        f.write(f"filtered by forcasted clients {str(now)}  and num_of_clients = {len(filtered_clients)}\n")
+        f.write(str(to_print))
+        # f.write(f"\ntotal_max_batches = {to_print_total_max_batches}\n")
+        f.write("\n\n")
+    
     return filtered_clients
+
+
+# def _filterby_forecasted_capacity_and_energy(power_domain_api: PowerDomainApi,
+    #                                          client_load_api: ClientLoadApi,
+    #                                          clients: List[Client],
+    #                                          now: datetime,
+    #                                          cfg: DictConfig) -> List[Tuple[Client, float]]:
+    #                                         #  d: int,
+    #                                         #  min_epochs: float) -> List[Client]:
+    
+    # filtered_clients: List[Client] = []
+    # to_print = []
+    # to_print_total_max_batches = []
+    # for client in clients:
+    #     possible_batches = client_load_api.forecast(now, duration_in_timesteps=_DURATION, client_name=client.name, cfg=cfg)
+    #     ree_powered_batches = power_domain_api.forecast(now, duration_in_timesteps=_DURATION, zone=client.zone, cfg = cfg) / client.energy_per_batch
+    #     # Significantly faster than pandas
+    #     total_max_batches = np.minimum(possible_batches.values, ree_powered_batches.values).sum()
+    #     to_print_total_max_batches.append(total_max_batches)
+    #     if total_max_batches >= client.batches_per_epoch * 1:
+    #         filtered_clients.append((client, total_max_batches))
+    #         to_print.append(client)
+    
+
+
+    # with open("filtered_clients.txt", "a") as f:
+    #     f.write(f"clients after removing excluded clients {str(clients)}\n")
+    #     f.write(f"filtered by forcasted clients {str(now)}  and num_of_clients = {len(filtered_clients)}\n")
+    #     f.write(str(to_print))
+    #     f.write(f"\ntotal_max_batches = {to_print_total_max_batches}\n")
+    #     f.write("\n\n")
+
+    # print("\n\nKhaansaar ka Salaaaaaar")
+    # #open a txt file to append the filtered clients 
+   
+
+    # print(filtered_clients)
+    # print("\n\n")
+    # return filtered_clients
+
+
 
 def _sort_key(client):
     # return client.batches_per_timestep * client.energy_per_batch
@@ -306,6 +392,7 @@ def _has_more_resources_in_future(possible_batches, ree_powered_batches):
     return (False, batches_if_selected) if (total_max_batches == batches_if_selected) else (True, 0)
 
 def _batches_to_class(batches):
+    # return 1
     if batches <= 10:
         return 0.0625
     elif batches <= 20:
@@ -316,4 +403,3 @@ def _batches_to_class(batches):
         return 0.5
     else:
         return 1
-

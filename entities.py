@@ -17,7 +17,11 @@ class Client:
         self.participated_batches = 0
         self.num_samples = 0.0
         self._statistical_utilities: Dict[int, float] = {}
-        self.weighted_participated_round = 0
+        self.weighted_participated_rounds = 0
+    
+    @property
+    def batches_per_epoch(self) -> int:
+        return math.ceil(self.num_samples / 10)
 
     def __repr__(self):
         return f"Client({self.name})"
@@ -29,7 +33,7 @@ class Client:
         if computed_batches > 0:
             self.participated_rounds += 1
             self.participated_batches += computed_batches
-            self.weighted_participated_round += model_size_used
+            self.weighted_participated_rounds += model_size_used
 
     def record_statistical_utility(self, server_round: int, utility: float) -> None:
         self._statistical_utilities[server_round] = utility

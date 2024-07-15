@@ -50,7 +50,9 @@ class FedZeroCM(fl.server.ClientManager):
         self.cycle_active_clients = set()
         self.cycle_participation_mean = 0
 
-        all_clients = self.client_load_api.get_clients()
+        # all_clients = self.client_load_api.get_clients()
+
+        self.time_now = None
         # self.client_history = {client : {'weighted_p_c' : 0, } for client in all_clients}
         # self._clients_to_cid = clients_to_cid
 
@@ -149,38 +151,43 @@ class FedZeroCM(fl.server.ClientManager):
         if min_num_clients is None:
             min_num_clients = num_clients
 
+        if self.time_now is None:
+            self.time_now = self.scenario.start_date
+
         TRANSITION_PERIOD_H = 12
-        now = timedelta(minutes=server_round * 100) + self.scenario.start_date
         wallah = self.cycle_participation_mean
         if self.cycle_start is None:
-            self.cycle_start = now
-        elif self.cycle_start + timedelta(hours=24) <= now:
-            self.cycle_start = now
+            self.cycle_start = self.time_now
+        elif self.cycle_start + timedelta(hours=24) <= self.time_now:
+            self.cycle_start = self.time_now
             self.cycle_participation_mean = np.mean([c.participated_rounds for c in self.cycle_active_clients])
             self.cycle_active_clients = set()
             print(f"############################################################")
             print(f"### NEW CYCLE! MEAN: {self.cycle_participation_mean} ###")
             print(f"############################################################")
-        elif self.cycle_start + timedelta(hours=24 - TRANSITION_PERIOD_H) <= now:
+        elif self.cycle_start + timedelta(hours=24 - TRANSITION_PERIOD_H) <= self.time_now:
             current_mean = np.mean([c.participated_rounds for c in self.cycle_active_clients])
-            factor = (now - (self.cycle_start + timedelta(hours=24 - TRANSITION_PERIOD_H))).seconds / 3600 / TRANSITION_PERIOD_H
+            factor = (self.time_now - (self.cycle_start + timedelta(hours=24 - TRANSITION_PERIOD_H))).seconds / 3600 / TRANSITION_PERIOD_H
             wallah = self.cycle_participation_mean + (current_mean - self.cycle_participation_mean) * factor
             print(f"Cycle mean: {self.cycle_participation_mean:.2f}, Current mean: {current_mean:.2f} factor: {factor}, result: {wallah} ###")
 
 
-        time_now = timedelta(minutes=server_round * 100) + self.scenario.start_date
-        clnts = _filterby_current_capacity_and_energy(self.power_domain_api, self.client_load_api, time_now, self.cfg)
+        clnts = _filterby_current_capacity_and_energy(self.power_domain_api, self.client_load_api, self.time_now, self.cfg)
 
         # myclients = sorted(clnts, key=_sort_key, reverse=True)
+        self.cycle_active_clients.union(clnts)
+        
+        self._update_excluded_clients(clnts, server_round, wallah)
 
-        filtered_clients = _filterby_forecasted_capacity_and_energy(self.power_domain_api, self.client_load_api, clnts, time_now, self.cfg)
+        clnts = [client for client in clnts if client not in self.excluded_clients]
 
-        # Update cycle_active_clients
-        self.cycle_active_clients.update(client for client, _ in filtered_clients)
-        filtered_clients, self.excluded_clients = _update_excluded_clients(filtered_clients, self.excluded_clients, self.cfg, server_round, wallah)
+        filtered_clients = _filterby_forecasted_capacity_and_energy(self.power_domain_api, self.client_load_api, clnts, self.time_now, self.cfg)
+        
+        self.time_now += timedelta(minutes=random.randint(10, 60))
         
         for client, batches_to_compute in filtered_clients:
             client.record_usage(batches_to_compute, _batches_to_class(batches_to_compute))
+            client.record_statistical_utility(server_round, 1000)
 
         cids_filtered_clients = self._clients_to_numpy_clients(filtered_clients)
 
@@ -223,6 +230,75 @@ class FedZeroCM(fl.server.ClientManager):
         for clnt, batches in clients:
             cids.append((self.clients[clnt.name], _batches_to_class(batches)))
         return cids
+    
+
+    def _update_excluded_clients(self, clients: List[Client], round_number, wallah: float) -> Tuple[List[Tuple[Client, float]]]:
+        alpha = self.cfg.client_selection.alpha
+        exclusion_factor = self.cfg.client_selection.exclusion_factor
+        rng = np.random.default_rng(seed=self.cfg.Scenario.seed)
+
+        # participants = [client for client in clients if client.name not in excluded_clients]
+        print("Yemito ivalla rekkalu vachinattu")
+        is_participated = [client.participated_in_last_round(round_number) for client in clients]
+        # for client in clients:
+        #     print(f'client name = {client.name}', client.participated_in_last_round(round_number))
+        participants = {client for client in clients if client.participated_in_last_round(round_number)}
+
+        
+
+        if not participants:
+            return clients
+        
+        print(f"| Participants: {len(participants)}")
+
+        print("\n\n")
+        print("Nippu Raaaaa")
+        print(self.excluded_clients)
+
+        # Calculate utility threshold
+        utility_threshold = np.quantile([client.statistical_utility() for client in participants], exclusion_factor)
+        print("Comeback Indian")
+        print(f"| Utility threshold: {utility_threshold:.2f} (quantile {exclusion_factor})")
+
+        # Exclude clients below threshold
+        newly_excluded = [client for client in participants if client.statistical_utility() <= utility_threshold]
+        print("\n\nHoyya Hoyya Neetho gadipay gadiya.....")
+        print(len(participants))
+        print(len(newly_excluded))
+        print(newly_excluded)
+        print("\n\n")
+        self.excluded_clients.extend(newly_excluded)
+
+        print(f"| Excluded clients after add: {len(self.excluded_clients)}")
+        for i, client in enumerate(self.excluded_clients):
+            participated_rounds = client.participated_rounds - wallah
+            if participated_rounds > 0:
+                probability = min(alpha * 1 / participated_rounds, 1)
+            else:
+                probability = 1
+
+            print(f"| #{i} {client.name}: {client.participated_rounds} part -> {probability:.0%} ...", end="")
+            if rng.random() <= probability:
+                print(" SUCCESS")
+                if client in self.excluded_clients:
+                    self.excluded_clients.remove(client)
+            else:
+                print("")
+        print(f"| Excluded clients after remove: {len(self.excluded_clients)}")
+        print("----------------------------------------------")
+        # create a txt file and append the excluded clients
+        with open("filtered_clients.txt", "a") as f:
+            f.write(f'current capacity Clients = {str(clients)}\n')
+            f.write(f"Is_participated = {is_participated}\n")
+            f.write(f"Participants in current round  = {participants}\n")
+            f.write(f"number of excluded clients {len(self.excluded_clients)}\n")
+            f.write(f"Excluded clients: {self.excluded_clients}\n")
+
+        
+        # Filter clients based on updated exclusion list
+        # updated_clients = [client for client in clients if client.name not in self.excluded_clients]
+
+        # return updated_clients
 
 def _filterby_current_capacity_and_energy(power_domain_api: PowerDomainApi,
                                           client_load_api: ClientLoadApi,
@@ -237,15 +313,74 @@ def _filterby_forecasted_capacity_and_energy(power_domain_api: PowerDomainApi,
                                              client_load_api: ClientLoadApi,
                                              clients: List[Client],
                                              now: datetime, cfg: DictConfig) -> List[Tuple[Client, float]]:
+    print("Manasa nuvvu unde chote cheppamma")
+    print(clients)
+    print("\n\n")
     filtered_clients: List[Tuple[Client, float]] = []
+    to_print = []
+
     for client in clients:
         possible_batches = client_load_api.forecast(now, client_name=client.name, duration_in_timesteps=_DURATION, cfg=cfg)
         ree_powered_batches = power_domain_api.forecast(start_time=now, zone=client.zone, duration_in_timesteps=_DURATION, cfg=cfg) / client.energy_per_batch
         to_select, batches_if_selected = _has_more_resources_in_future(possible_batches, ree_powered_batches)
         if not to_select:
             filtered_clients.append((client, batches_if_selected))
-    filtered_clients = sorted(filtered_clients, key=_sort_key)
+            to_print.append(client)
+    filtered_clients = sorted(filtered_clients, key=_sort_key, reverse=True)
+
+    # append the filtered clients to filtered_clients.txt file
+    # with open("filtered_clients.txt", "a") as f:
+    #     f.write(f"Round {now} - Filtered clients: {filtered_clients}\n")
+
+    with open("filtered_clients.txt", "a") as f:
+        f.write(f"clients after removing excluded clients {str(clients)}\n")
+        f.write(f"filtered by forcasted clients {str(now)}  and num_of_clients = {len(filtered_clients)}\n")
+        f.write(str(to_print))
+        # f.write(f"\ntotal_max_batches = {to_print_total_max_batches}\n")
+        f.write("\n\n")
+    
     return filtered_clients
+
+
+# def _filterby_forecasted_capacity_and_energy(power_domain_api: PowerDomainApi,
+    #                                          client_load_api: ClientLoadApi,
+    #                                          clients: List[Client],
+    #                                          now: datetime,
+    #                                          cfg: DictConfig) -> List[Tuple[Client, float]]:
+    #                                         #  d: int,
+    #                                         #  min_epochs: float) -> List[Client]:
+    
+    # filtered_clients: List[Client] = []
+    # to_print = []
+    # to_print_total_max_batches = []
+    # for client in clients:
+    #     possible_batches = client_load_api.forecast(now, duration_in_timesteps=_DURATION, client_name=client.name, cfg=cfg)
+    #     ree_powered_batches = power_domain_api.forecast(now, duration_in_timesteps=_DURATION, zone=client.zone, cfg = cfg) / client.energy_per_batch
+    #     # Significantly faster than pandas
+    #     total_max_batches = np.minimum(possible_batches.values, ree_powered_batches.values).sum()
+    #     to_print_total_max_batches.append(total_max_batches)
+    #     if total_max_batches >= client.batches_per_epoch * 1:
+    #         filtered_clients.append((client, total_max_batches))
+    #         to_print.append(client)
+    
+
+
+    # with open("filtered_clients.txt", "a") as f:
+    #     f.write(f"clients after removing excluded clients {str(clients)}\n")
+    #     f.write(f"filtered by forcasted clients {str(now)}  and num_of_clients = {len(filtered_clients)}\n")
+    #     f.write(str(to_print))
+    #     f.write(f"\ntotal_max_batches = {to_print_total_max_batches}\n")
+    #     f.write("\n\n")
+
+    # print("\n\nKhaansaar ka Salaaaaaar")
+    # #open a txt file to append the filtered clients 
+   
+
+    # print(filtered_clients)
+    # print("\n\n")
+    # return filtered_clients
+
+
 
 def _sort_key(client):
     # return client.batches_per_timestep * client.energy_per_batch
@@ -257,6 +392,7 @@ def _has_more_resources_in_future(possible_batches, ree_powered_batches):
     return (False, batches_if_selected) if (total_max_batches == batches_if_selected) else (True, 0)
 
 def _batches_to_class(batches):
+    # return 1
     if batches <= 10:
         return 0.0625
     elif batches <= 20:
@@ -267,43 +403,3 @@ def _batches_to_class(batches):
         return 0.5
     else:
         return 1
-
-def _update_excluded_clients(clients: List[Tuple[Client, float]], excluded_clients: List[str], cfg: DictConfig, server_round: int, wallah: float) -> Tuple[List[Tuple[Client, float]], List[str]]:
-    alpha = cfg.client_selection.alpha
-    exclusion_factor = cfg.client_selection.exclusion_factor
-    rng = np.random.default_rng(seed=cfg.Scenario.seed)
-
-    participants = [client for client, _ in clients if client.name not in excluded_clients]
-    
-    if not participants:
-        return clients, excluded_clients
-
-    # Calculate utility threshold
-    utility_threshold = np.quantile([client.statistical_utility() for client in participants], exclusion_factor)
-    
-    # Exclude clients below threshold
-    newly_excluded = [client.name for client in participants if client.statistical_utility() <= utility_threshold]
-    excluded_clients.extend(newly_excluded)
-
-    # Give excluded clients a chance to rejoin
-    clients_to_remove = []
-    for client_name in excluded_clients:
-        client = next((c for c, _ in clients if c.name == client_name), None)
-        if client:
-            if client.participated_in_last_round(server_round):
-                participated_rounds = client.weighted_count - wallah
-                if participated_rounds > 0:
-                    probability = min(alpha * 1 / participated_rounds, 1)
-                else:
-                    probability = 1
-                if rng.random() <= probability:
-                    clients_to_remove.append(client_name)
-
-    # Remove clients from excluded list
-    for client_name in clients_to_remove:
-        excluded_clients.remove(client_name)
-
-    # Filter clients based on updated exclusion list
-    updated_clients = [client for client in clients if client[0].name not in excluded_clients]
-
-    return updated_clients, excluded_clients

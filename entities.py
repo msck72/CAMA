@@ -18,6 +18,10 @@ class Client:
         self.num_samples = 0.0
         self._statistical_utilities: Dict[int, float] = {}
         self.weighted_count = 0
+    
+    @property
+    def batches_per_epoch(self) -> int:
+        return math.ceil(self.num_samples / 10)
 
     def __repr__(self):
         return f"Client({self.name})"

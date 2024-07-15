@@ -1,7 +1,7 @@
 Simulation:
   NIID_DATA_SEED: 42
   SAVE_TRAINED_MODELS: False
-  TIMESTEP_IN_MIN: 10
+  TIMESTEP_IN_MIN: 1
   MAX_ROUND_IN_MIN: 60
   MAX_ROUNDS: 10
   MAX_TIME_IN_DAYS: 7
@@ -17,7 +17,7 @@ Scenario:
   dataset: "mnist"
   model: "conv"
   hidden_layers: [64, 128, 256, 256]
-  approach: "fedzero_0_1"
+  approach: "fedzero_1_1"
   overselect: 1
   forecast_error: "error"
   imbalanced_scenario: False
@@ -25,8 +25,8 @@ Scenario:
   beta: 0.1
 
 client_selection:  # New section for client selection parameters
-  alpha: 0.1  # Adjust this value as needed
-  exclusion_factor: 0.2  # Adjust this value as needed
+  alpha: 1  # Adjust this value as needed
+  exclusion_factor: 1  # Adjust this value as needed
 
 optim_scheduler:
   optimizer: SGD

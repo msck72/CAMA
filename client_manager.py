@@ -179,7 +179,7 @@ class FedZeroCM(fl.server.ClientManager):
         # myclients = sorted(clnts, key=_sort_key, reverse=True)
         self.cycle_active_clients.union(clnts)
         
-        # self._update_excluded_clients(clnts, server_round, wallah)
+        self._update_excluded_clients(clnts, server_round, wallah)
 
         clnts = [client for client in clnts if client not in self.excluded_clients]
 
@@ -323,7 +323,6 @@ def _filterby_forecasted_capacity_and_energy(power_domain_api: PowerDomainApi,
                                              client_load_api: ClientLoadApi,
                                              clients: List[Client],
                                              now: datetime, cfg: DictConfig) -> List[Tuple[Client, float]]:
-    print("Manasa nuvvu unde chote cheppamma")
     print(clients)
     print("\n\n")
     filtered_clients: List[Tuple[Client, float]] = []
@@ -402,17 +401,17 @@ def _has_more_resources_in_future(possible_batches, ree_powered_batches):
     return (False, batches_if_selected) if (total_max_batches == batches_if_selected) else (True, 0)
 
 def _batches_to_class(batches):
-    return 1
-    # if batches <= 10:
-    #     return 0.0625
-    # elif batches <= 20:
-    #     return 0.125
-    # elif batches <= 30:
-    #     return 0.25
-    # elif batches <= 40:
-    #     return 0.5
-    # else:
-    #     return 1
+    # return 1
+    if batches <= 10:
+        return 0.0625
+    elif batches <= 20:
+        return 0.125
+    elif batches <= 30:
+        return 0.25
+    elif batches <= 40:
+        return 0.5
+    else:
+        return 1
     
 def _ws_to_kwh(ws: float) -> float:
     return ws / 3600 / 1000

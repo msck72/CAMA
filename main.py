@@ -149,13 +149,8 @@ def simulate_fl_training(experiment: Experiment, device: torch.device, cfg: Dict
     client_to_param_index = {i: [v.shape for _, v in create_model(cfg.Scenario, i).state_dict().items()] for i in model_rates}
     client_to_batches = [len(client_train_loader) for client_train_loader in trainloaders]
 
-    print("RaRa jagathini jayinchudam client to batches")
-    print(client_to_batches)
     client_manager = FedZeroCM(experiment.scenario.power_domain_api, experiment.scenario.client_load_api, experiment.scenario, cfg, client_to_batches)
     
-    # rey aajaamam ikkada code marchali ra
-    # REY aajaamam modify chestini
-    # Pass parameters to the Strategy for server-side parameter initialization
     strategy = FedZero(
         client_to_param_index=client_to_param_index,
         model = create_model(cfg.Scenario, model_rate = 1),
@@ -165,8 +160,6 @@ def simulate_fl_training(experiment: Experiment, device: torch.device, cfg: Dict
         evaluate_fn=server_eval_fn
     )
 
-    # ikkada kooda okasari choodavayya
-    # check how fedzero server in their code is using experiment class
     history = flwr.simulation.start_simulation(
         client_fn=client_fn,
         clients_ids=[c.name for c in experiment.scenario.client_load_api.get_clients()],

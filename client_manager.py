@@ -179,7 +179,7 @@ class FedZeroCM(fl.server.ClientManager):
         # myclients = sorted(clnts, key=_sort_key, reverse=True)
         self.cycle_active_clients.union(clnts)
         
-        # self._update_excluded_clients(clnts, server_round, wallah)
+        self._update_excluded_clients(clnts, server_round, wallah)
 
         clnts = [client for client in clnts if client not in self.excluded_clients]
 
@@ -247,36 +247,20 @@ class FedZeroCM(fl.server.ClientManager):
         exclusion_factor = self.cfg.client_selection.exclusion_factor
         rng = np.random.default_rng(seed=self.cfg.Scenario.seed)
 
-        # participants = [client for client in clients if client.name not in excluded_clients]
-        print("Yemito ivalla rekkalu vachinattu")
-        is_participated = [client.participated_in_last_round(round_number) for client in clients]
         # for client in clients:
         #     print(f'client name = {client.name}', client.participated_in_last_round(round_number))
         participants = {client for client in clients if client.participated_in_last_round(round_number)}
 
-        
-
         if not participants:
             return clients
-        
         print(f"| Participants: {len(participants)}")
-
-        print("\n\n")
-        print("Nippu Raaaaa")
-        print(self.excluded_clients)
 
         # Calculate utility threshold
         utility_threshold = np.quantile([client.statistical_utility() for client in participants], exclusion_factor)
-        print("Comeback Indian")
         print(f"| Utility threshold: {utility_threshold:.2f} (quantile {exclusion_factor})")
 
         # Exclude clients below threshold
         newly_excluded = [client for client in participants if client.statistical_utility() <= utility_threshold]
-        print("\n\nHoyya Hoyya Neetho gadipay gadiya.....")
-        print(len(participants))
-        print(len(newly_excluded))
-        print(newly_excluded)
-        print("\n\n")
         self.excluded_clients.extend(newly_excluded)
 
         print(f"| Excluded clients after add: {len(self.excluded_clients)}")
@@ -296,19 +280,12 @@ class FedZeroCM(fl.server.ClientManager):
                 print("")
         print(f"| Excluded clients after remove: {len(self.excluded_clients)}")
         print("----------------------------------------------")
-        # create a txt file and append the excluded clients
         with open("filtered_clients.txt", "a") as f:
             f.write(f'current capacity Clients = {str(clients)}\n')
-            f.write(f"Is_participated = {is_participated}\n")
+            # f.write(f"Is_participated = {is_participated}\n")
             f.write(f"Participants in current round  = {participants}\n")
             f.write(f"number of excluded clients {len(self.excluded_clients)}\n")
             f.write(f"Excluded clients: {self.excluded_clients}\n")
-
-        
-        # Filter clients based on updated exclusion list
-        # updated_clients = [client for client in clients if client.name not in self.excluded_clients]
-
-        # return updated_clients
 
 def _filterby_current_capacity_and_energy(power_domain_api: PowerDomainApi,
                                           client_load_api: ClientLoadApi,
@@ -323,9 +300,6 @@ def _filterby_forecasted_capacity_and_energy(power_domain_api: PowerDomainApi,
                                              client_load_api: ClientLoadApi,
                                              clients: List[Client],
                                              now: datetime, cfg: DictConfig) -> List[Tuple[Client, float]]:
-    print("Manasa nuvvu unde chote cheppamma")
-    print(clients)
-    print("\n\n")
     filtered_clients: List[Tuple[Client, float]] = []
     to_print = []
 
@@ -402,17 +376,17 @@ def _has_more_resources_in_future(possible_batches, ree_powered_batches):
     return (False, batches_if_selected) if (total_max_batches == batches_if_selected) else (True, 0)
 
 def _batches_to_class(batches):
-    return 1
-    # if batches <= 10:
-    #     return 0.0625
-    # elif batches <= 20:
-    #     return 0.125
-    # elif batches <= 30:
-    #     return 0.25
-    # elif batches <= 40:
-    #     return 0.5
-    # else:
-    #     return 1
+    # return 1
+    if batches <= 10:
+        return 0.0625
+    elif batches <= 20:
+        return 0.125
+    elif batches <= 30:
+        return 0.25
+    elif batches <= 40:
+        return 0.5
+    else:
+        return 1
     
 def _ws_to_kwh(ws: float) -> float:
     return ws / 3600 / 1000

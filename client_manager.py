@@ -36,7 +36,7 @@ from omegaconf import DictConfig
 _DURATION = 5
 
 class FedZeroCM(fl.server.ClientManager):
-    def __init__(self, power_domain_api: PowerDomainApi, client_load_api: ClientLoadApi, scenario: Scenario, cfg: DictConfig) -> None:
+    def __init__(self, power_domain_api: PowerDomainApi, client_load_api: ClientLoadApi, scenario: Scenario, cfg: DictConfig, client_to_batches) -> None:
         self.clients: Dict[str, ClientProxy] = {}
         self._cv = threading.Condition()
         self.power_domain_api = power_domain_api
@@ -53,6 +53,8 @@ class FedZeroCM(fl.server.ClientManager):
         # all_clients = self.client_load_api.get_clients()
 
         self.time_now = None
+        self.total_carbon_foorprint = 0
+        self.client_to_batches = client_to_batches
         # self.client_history = {client : {'weighted_p_c' : 0, } for client in all_clients}
         # self._clients_to_cid = clients_to_cid
 
@@ -177,7 +179,7 @@ class FedZeroCM(fl.server.ClientManager):
         # myclients = sorted(clnts, key=_sort_key, reverse=True)
         self.cycle_active_clients.union(clnts)
         
-        self._update_excluded_clients(clnts, server_round, wallah)
+        # self._update_excluded_clients(clnts, server_round, wallah)
 
         clnts = [client for client in clnts if client not in self.excluded_clients]
 
@@ -187,12 +189,16 @@ class FedZeroCM(fl.server.ClientManager):
         
         filtered_clients = filtered_clients[:num_clients]
         carbon_footprint_till_now = 0
-        for client, batches_to_compute in filtered_clients:
-            carbon_footprint_till_now += client.record_usage(batches_to_compute, _batches_to_class(batches_to_compute))
+        for client, expected_batches in filtered_clients:
+            batches_in_client = self.client_to_batches[int(client.name.split('_')[0])] * self.cfg.Simulation.EPOCHS
+            carbon_footprint_till_now += client.record_usage( batches_in_client, _batches_to_class(expected_batches))
             # carbon_footprint_till_now += client.carbon_footprint
             client.record_statistical_utility(server_round, 1000)
 
-        print(f"carbon_footprint till now ({server_round}) = ",  carbon_footprint_till_now)
+        self.total_carbon_foorprint += _ws_to_kwh(carbon_footprint_till_now)
+
+        # print('testing carbon footprint = ', _ws_to_kwh(sum(client.participated_batches * client.energy_per_batch for client in self.client_load_api.get_clients())))
+        print(f"carbon_footprint till now ({server_round}) = ",  self.total_carbon_foorprint)
         cids_filtered_clients = self._clients_to_numpy_clients(filtered_clients)
 
         filtered_client_proxies = []
@@ -200,7 +206,7 @@ class FedZeroCM(fl.server.ClientManager):
             cpr.properties['model_rate'] = model_size
             filtered_client_proxies.append(cpr)
         
-        # selected_clients = filtered_client_proxies[:num_clients]
+        selected_clients = filtered_client_proxies[:num_clients]
         if (len(selected_clients) >= self.cfg.Simulation.CLIENTS_PER_ROUND):
             selected_clients = selected_clients[:self.cfg.Simulation.CLIENTS_PER_ROUND]
 
@@ -396,14 +402,17 @@ def _has_more_resources_in_future(possible_batches, ree_powered_batches):
     return (False, batches_if_selected) if (total_max_batches == batches_if_selected) else (True, 0)
 
 def _batches_to_class(batches):
-    # return 1
-    if batches <= 10:
-        return 0.0625
-    elif batches <= 20:
-        return 0.125
-    elif batches <= 30:
-        return 0.25
-    elif batches <= 40:
-        return 0.5
-    else:
-        return 1
+    return 1
+    # if batches <= 10:
+    #     return 0.0625
+    # elif batches <= 20:
+    #     return 0.125
+    # elif batches <= 30:
+    #     return 0.25
+    # elif batches <= 40:
+    #     return 0.5
+    # else:
+    #     return 1
+    
+def _ws_to_kwh(ws: float) -> float:
+    return ws / 3600 / 1000

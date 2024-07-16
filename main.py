@@ -147,8 +147,11 @@ def simulate_fl_training(experiment: Experiment, device: torch.device, cfg: Dict
    
     model_rates = [1, 0.5, 0.25, 0.125, 0.0625]
     client_to_param_index = {i: [v.shape for _, v in create_model(cfg.Scenario, i).state_dict().items()] for i in model_rates}
+    client_to_batches = [len(client_train_loader) for client_train_loader in trainloaders]
 
-    client_manager = FedZeroCM(experiment.scenario.power_domain_api, experiment.scenario.client_load_api, experiment.scenario, cfg)
+    print("RaRa jagathini jayinchudam client to batches")
+    print(client_to_batches)
+    client_manager = FedZeroCM(experiment.scenario.power_domain_api, experiment.scenario.client_load_api, experiment.scenario, cfg, client_to_batches)
     
     # rey aajaamam ikkada code marchali ra
     # REY aajaamam modify chestini

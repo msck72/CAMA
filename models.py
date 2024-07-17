@@ -12,8 +12,9 @@ def create_model(cfg, model_rate, device= torch.device('cpu'))  :
     if(cfg.dataset == 'mnist'):
         return conv(model_rate, [1, 28, 28], 10, cfg.hidden_layers, device)
     elif(cfg.dataset == 'cifar10'):
+        print(cfg.hidden_layers)
         # return conv(model_rate, [3, 32, 32], 10, cfg.hidden_layers, device)
-        return ResNet(cfg.hidden_layers, model_rate, device)
+        return create_ResNet18(cfg.hidden_layers, model_rate, device)
     else:
         raise ValueError("Sorry no dataset_name is known")
     
@@ -146,17 +147,18 @@ class ResNet(nn.Module):
 
         self.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
         self.bn1 = nn.BatchNorm2d(64)
-        self.layer1 = self._make_layer(block, hidden_layers[0] * model_rate, num_blocks[0], stride=1)
-        self.layer2 = self._make_layer(block, hidden_layers[1] * model_rate, num_blocks[1], stride=2)
-        self.layer3 = self._make_layer(block, hidden_layers[2] * model_rate, num_blocks[2], stride=2)
-        self.layer4 = self._make_layer(block, hidden_layers[3] * model_rate, num_blocks[3], stride=2)
-        self.linear = nn.Linear(hidden_layers[3] * model_rate * block.expansion, num_classes)
+        self.layer1 = self._make_layer(block, hidden_layers[0] , num_blocks[0], stride=1)
+        self.layer2 = self._make_layer(block, hidden_layers[1] , num_blocks[1], stride=2)
+        self.layer3 = self._make_layer(block, hidden_layers[2] , num_blocks[2], stride=2)
+        self.layer4 = self._make_layer(block, hidden_layers[3] , num_blocks[3], stride=2)
+        temp = hidden_layers[3] * block.expansion
+        self.linear = nn.Linear(int(temp), num_classes)
 
     def _make_layer(self, block, planes, num_blocks, stride):
         strides = [stride] + [1] * (num_blocks - 1)
         layers = []
         for stride in strides:
-            layers.append(block(self.in_planes, planes, stride))
+            layers.append(block(self.in_planes, int(planes), stride))
             self.in_planes = planes * block.expansion
         return nn.Sequential(*layers)
 
@@ -171,8 +173,12 @@ class ResNet(nn.Module):
         out = self.linear(out)
         return out
 
-def ResNet18(hidden_layers, model_rate = 1, device = "cpu"):
-    return ResNet(hidden_layers, BasicBlock, [2, 2, 2, 2], model_rate)
+def create_ResNet18(hidden_layers, model_rate = 1, device = "cpu"):
+    hidden_layers = [int(layer * model_rate) for layer in hidden_layers]
+    print("is it float64??")
+    print(type(hidden_layers))
+    print(hidden_layers[0])
+    return ResNet(BasicBlock, hidden_layers=hidden_layers, num_blocks=[2, 2, 2, 2], model_rate=model_rate)
 
 
 def get_state_dict_from_param(model, parameters):

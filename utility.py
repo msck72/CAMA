@@ -103,7 +103,7 @@ def get_parameters(net) -> List[np.ndarray]:
 def set_parameters(net, parameters: List[np.ndarray]):
     """Set the model parameters with given parameters."""
     params_dict = zip(net.state_dict().keys(), parameters)
-    state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
+    state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
     net.load_state_dict(state_dict, strict=True)
 
 

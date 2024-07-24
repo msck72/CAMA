@@ -8,11 +8,11 @@ from flwr.common import parameters_to_ndarrays
 
 
 def create_model(cfg, model_rate, device= torch.device('cpu'))  :
-    print('model being created')
+    # print('model being created')
     if(cfg.dataset == 'mnist'):
         return conv(model_rate, [1, 28, 28], 10, cfg.hidden_layers, device)
     elif(cfg.dataset == 'cifar10'):
-        print(cfg.hidden_layers)
+        # print(cfg.hidden_layers)
         # return conv(model_rate, [3, 32, 32], 10, cfg.hidden_layers, device)
         return create_ResNet18(cfg.hidden_layers, model_rate, device)
     else:
@@ -22,9 +22,19 @@ def create_model(cfg, model_rate, device= torch.device('cpu'))  :
 def copy_gp_to_lp(global_parameters , local_values_shape):
     new_state_dict = {}
     i = 0
+    j = 0
+    # for _, v1 in global_parameters.items():
+    #     print(f'{v1.shape},   {local_values_shape[j]}')
+    #     j+= 1
+    
+    # print("enetring copying")
     for k , v in global_parameters.items():
-        slices = [slice(0, dim) for dim in local_values_shape[i]]
-        new_state_dict[k] = copy.deepcopy(v[slices])
+        # print(f'{v.shape},    {local_values_shape[i]}')
+        if v.shape != torch.Size([]):
+            slices = [slice(0, dim) for dim in local_values_shape[i]]
+            new_state_dict[k] = copy.deepcopy(v[slices])
+        else:
+            new_state_dict[k] = copy.deepcopy(v)
         i += 1
     return new_state_dict
 
@@ -143,16 +153,16 @@ class BasicBlock(nn.Module):
 class ResNet(nn.Module):
     def __init__(self, block, hidden_layers , num_blocks, num_classes=10, model_rate=1):
         super(ResNet, self).__init__()
-        self.in_planes = 64
+        self.in_planes = hidden_layers[0]
+        self.num_classes = num_classes
 
-        self.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
-        self.bn1 = nn.BatchNorm2d(64)
+        self.conv1 = nn.Conv2d(3, hidden_layers[0], kernel_size=7, stride=1, padding=1, bias=False)
+        self.bn1 = nn.BatchNorm2d(hidden_layers[0])
         self.layer1 = self._make_layer(block, hidden_layers[0] , num_blocks[0], stride=1)
         self.layer2 = self._make_layer(block, hidden_layers[1] , num_blocks[1], stride=2)
         self.layer3 = self._make_layer(block, hidden_layers[2] , num_blocks[2], stride=2)
         self.layer4 = self._make_layer(block, hidden_layers[3] , num_blocks[3], stride=2)
-        temp = hidden_layers[3] * block.expansion
-        self.linear = nn.Linear(int(temp), num_classes)
+        self.linear = nn.Linear(int(hidden_layers[3] * block.expansion), num_classes)
 
     def _make_layer(self, block, planes, num_blocks, stride):
         strides = [stride] + [1] * (num_blocks - 1)
@@ -162,23 +172,34 @@ class ResNet(nn.Module):
             self.in_planes = planes * block.expansion
         return nn.Sequential(*layers)
 
-    def forward(self, x):
+    def forward(self, input_dict):
+        x = input_dict['img']
         out = torch.relu(self.bn1(self.conv1(x)))
         out = self.layer1(out)
         out = self.layer2(out)
         out = self.layer3(out)
         out = self.layer4(out)
-        out = torch.avg_pool2d(out, 4)
+        out = nn.functional.avg_pool2d(out, 4)
         out = out.view(out.size(0), -1)
         out = self.linear(out)
+        # output = {}
+        if "label_split" in input_dict:
+            label_mask = torch.zeros(
+                self.num_classes, device=out.device
+            )
+            label_mask[input_dict["label_split"]] = 1
+            out = out.masked_fill(label_mask == 0, 0)
+        # output['score'] = out
+        # output['loss'] = F.cross_entropy(output["score"], input_dict["label"])
+        # return output
         return out
 
 def create_ResNet18(hidden_layers, model_rate = 1, device = "cpu"):
     hidden_layers = [int(layer * model_rate) for layer in hidden_layers]
-    print("is it float64??")
-    print(type(hidden_layers))
-    print(hidden_layers[0])
-    return ResNet(BasicBlock, hidden_layers=hidden_layers, num_blocks=[2, 2, 2, 2], model_rate=model_rate)
+    # print("is it float64??")
+    # print(type(hidden_layers))
+    # print(hidden_layers[0])
+    return ResNet(BasicBlock, hidden_layers=hidden_layers, num_blocks=[2, 2, 2, 2], model_rate=model_rate).to(device)
 
 
 def get_state_dict_from_param(model, parameters):

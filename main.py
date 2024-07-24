@@ -6,6 +6,7 @@ import click
 import flwr
 import pandas as pd
 import torch
+import torchvision
 from flwr.client import NumPyClient
 from flwr.server import ServerConfig
 from torch.utils.tensorboard import SummaryWriter
@@ -118,7 +119,7 @@ def simulate_fl_training(experiment: Experiment, device: torch.device, cfg: Dict
 
     # Initialize 1 model for initial params
     model = create_model(cfg=cfg.Scenario, model_rate=1, device=device)
-    initial_params = get_parameters(model)
+    # initial_params = get_parameters(model)
 
     for i, (c, trainloader) in enumerate(zip(experiment.scenario.client_load_api.get_clients(), trainloaders)):
         c.num_samples = len(trainloader) * cfg.Simulation['BATCH_SIZE']
@@ -151,9 +152,17 @@ def simulate_fl_training(experiment: Experiment, device: torch.device, cfg: Dict
 
     client_manager = FedZeroCM(experiment.scenario.power_domain_api, experiment.scenario.client_load_api, experiment.scenario, cfg, client_to_batches)
     
+    pretrained_model = torchvision.models.resnet18(weights='DEFAULT')
+    pretrained_model.fc = torch.nn.Linear(pretrained_model.fc.in_features, 10)
+    custom_model = create_model(cfg.Scenario, model_rate = 1)
+
+    # Load compatible layers
+    custom_model.load_state_dict({k: v for k, v in zip(custom_model.state_dict().keys(), pretrained_model.state_dict().values())}, strict=True)
+    initial_params = get_parameters(custom_model)
+
     strategy = FedZero(
         client_to_param_index=client_to_param_index,
-        model = create_model(cfg.Scenario, model_rate = 1),
+        model = custom_model,
         fraction_fit=cfg.Simulation['NUM_CLIENTS'] / cfg.Simulation['CLIENTS_PER_ROUND'],
         fraction_evaluate=0,  # we only do server side evaluation
         initial_parameters=flwr.common.ndarrays_to_parameters(initial_params),

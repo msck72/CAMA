@@ -131,6 +131,8 @@ class FedZero(Strategy):
         self.evaluate_metrics_aggregation_fn = evaluate_metrics_aggregation_fn
         self.inplace = inplace
 
+        self.prev_utility = []
+
     def __repr__(self) -> str:
         """Compute a string representation of the strategy."""
         rep = f"FedAvg(accept_failures={self.accept_failures})"
@@ -183,7 +185,7 @@ class FedZero(Strategy):
             client_manager.num_available()
         )
         clients = client_manager.sample(
-            num_clients=sample_size, min_num_clients=min_num_clients, server_round=server_round
+            num_clients=sample_size, min_num_clients=min_num_clients, server_round=server_round, prev_rnd_clnts_stat_util = self.prev_utility
         )
 
         global_param_with_sd = get_state_dict_from_param(self.model, parameters)
@@ -197,6 +199,7 @@ class FedZero(Strategy):
             final_list_of_clients.append((client, FitIns(ndarrays_to_parameters(local_param_fitres), client.properties)))
         # Return client/config pairs
         # return [(client, fit_ins) for client in clients]
+        print("completed configure fit")
         return final_list_of_clients
 
     def configure_evaluate(
@@ -240,12 +243,17 @@ class FedZero(Strategy):
             # print("in aggregate in-between layers")
             """Padding layers with 0 to max size, then average them"""
             # Get the layer's largest form
+            if all(l.shape == () for l in layer_updates):
+                return np.array(np.mean(layer_updates))
+            
             max_ch = np.max([np.shape(l) for l in layer_updates], axis=0)
             layer_agg = np.zeros(max_ch)
             count_layer = np.zeros(max_ch)  # to average by num of models that size
             for l in layer_updates:
                 local_ch = np.shape(l)
                 pad_shape = [(0, a) for a in (max_ch - local_ch)]
+                # print(f'l_shape = {l.shape}')
+                # print(f'pad_shape = {pad_shape}')
                 l_padded = np.pad(l, pad_shape, constant_values=0.0)
                 ones_of_shape = np.ones(local_ch)
                 ones_pad = np.pad(ones_of_shape, pad_shape, constant_values=0.0)
@@ -305,6 +313,8 @@ class FedZero(Strategy):
             layer_agg = layer_agg / count_layer
             return layer_agg
 
+
+        self.prev_utility = [(cp.cid, fit_res.metrics['statistical_utility']) for cp, fit_res in results]
         # Create a list of weights, each multiplied by the related number of examples
         weighted_weights = [
             [layer for layer in parameters_to_ndarrays(fit_res.parameters)] for _ , fit_res in results
@@ -358,9 +368,12 @@ class FedZero(Strategy):
         # keep the rest of global parameters as it is
         for i , layer in enumerate(agg_layers):
             layer = torch.from_numpy(layer)
-            layer_shape = layer.shape
-            slices = [slice(0, dim) for dim in layer_shape]
-            global_values[i][slices] = layer
+            if layer.dim() == 0:
+                global_values[i] = layer
+            else:
+                layer_shape = layer.shape
+                slices = [slice(0, dim) for dim in layer_shape]
+                global_values[i][slices] = layer
         
         for i , inner_layer in enumerate(last_weight_layer):
 

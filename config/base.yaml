@@ -22,7 +22,7 @@ Scenario:
   forecast_error: "error"
   imbalanced_scenario: False
   seed: 42  # Added seed for reproducibility
-  beta: 0.1
+  beta: 0.5
 
 client_selection:  # New section for client selection parameters
   alpha: 1  # Adjust this value as needed
@@ -30,13 +30,13 @@ client_selection:  # New section for client selection parameters
 
 optim_scheduler:
   optimizer: SGD
-  lr: 0.1
+  lr: 0.001
   momentum: 0.9
   weight_decay: 5.00e-04
 
 RAY_CLIENT_RESOURCES:
   num_cpus: 1
-  num_gpus: 0
+  num_gpus: 0.4
 
 RAY_INIT_ARGS:
   ignore_reinit_error: True

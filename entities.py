@@ -69,6 +69,12 @@ class ClientLoadApi:
         if zones is None:
             return list(self._clients.values())
         return [client for client in self._clients.values() if client.zone in zones]
+    
+    def get_clients_as_dict(self, zones: Optional[List[str]] = None) -> Dict[str, Client]:
+        """Returns the names of clients present in one of the zones as list."""
+        if zones is None:
+            return {client.name : client for client in list(self._clients.values())}
+        return {client.name: client for client in self._clients.values() if client.zone in zones}
 
     def actual(self, dt: datetime, client_name: str,) -> float:
         """Returns the actual amount of batches than can be computed during the next timestep."""

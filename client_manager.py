@@ -147,9 +147,17 @@ class FedZeroCM(fl.server.ClientManager):
         self,
         num_clients: int,
         server_round: int,
+        prev_rnd_clnts_stat_util: List[Tuple[str, float]], 
         min_num_clients: Optional[int] = None,
         criterion: Optional[Criterion] = None,
     ) -> List[ClientProxy]:
+        
+        if server_round > 0:
+            all_clients_dict = self.client_load_api.get_clients_as_dict()
+            for i, stat_util in prev_rnd_clnts_stat_util:
+                all_clients_dict[i].record_statistical_utility(server_round - 1, stat_util)
+
+
         if min_num_clients is None:
             min_num_clients = num_clients
 
@@ -180,7 +188,6 @@ class FedZeroCM(fl.server.ClientManager):
         self.cycle_active_clients.union(clnts)
         
         self._update_excluded_clients(clnts, server_round, wallah)
-        self._update_excluded_clients(clnts, server_round, wallah)
 
         clnts = [client for client in clnts if client not in self.excluded_clients]
 
@@ -194,7 +201,7 @@ class FedZeroCM(fl.server.ClientManager):
             batches_in_client = self.client_to_batches[int(client.name.split('_')[0])] * self.cfg.Simulation.EPOCHS
             carbon_footprint_till_now += client.record_usage( batches_in_client, _batches_to_class(expected_batches))
             # carbon_footprint_till_now += client.carbon_footprint
-            client.record_statistical_utility(server_round, 1000)
+            # client.record_statistical_utility(server_round, 1000)
 
         self.total_carbon_foorprint += _ws_to_kwh(carbon_footprint_till_now)
 
@@ -380,17 +387,6 @@ def _has_more_resources_in_future(possible_batches, ree_powered_batches):
     return (False, batches_if_selected) if (total_max_batches == batches_if_selected) else (True, 0)
 
 def _batches_to_class(batches):
-    # return 1
-    if batches <= 10:
-        return 0.0625
-    elif batches <= 20:
-        return 0.125
-    elif batches <= 30:
-        return 0.25
-    elif batches <= 40:
-        return 0.5
-    else:
-        return 1
     # return 1
     if batches <= 10:
         return 0.0625

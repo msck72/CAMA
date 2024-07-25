@@ -231,103 +231,103 @@ class FedZero(Strategy):
         return [(client, evaluate_ins) for client in clients]
 
     def aggregate_fit(
-            self,
-            server_round: int,
-            results: List[Tuple[ClientProxy, FitRes]],
-            failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
-        ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
-            """Aggregate fit results using weighted average."""
-            print(f'In Aggregate Tiger Nageswara rao and number of client proxys = {len(results)}')
+        self,
+        server_round: int,
+        results: List[Tuple[ClientProxy, FitRes]],
+        failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
+    ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
+        """Aggregate fit results using weighted average."""
+        print(f'In Aggregate Tiger Nageswara rao and number of client proxys = {len(results)}')
 
-            def aggregate_layer(layer_updates, num_examples, label_split = None):
+        def aggregate_layer(layer_updates, num_examples, label_split = None):
+            
+            if all(l.shape == () for l in layer_updates):
+                return np.array(float(np.sum(layer_updates)) / np.sum(num_examples))
+            
+            max_ch = np.max([np.shape(l) for l in layer_updates], axis=0)
+            layer_agg = np.zeros(max_ch)
+            count_layer = np.zeros(max_ch)  # to average by num of models that size
+            for i, l in enumerate(layer_updates):
+                local_ch = np.shape(l)
+                pad_shape = [(0, a) for a in (max_ch - local_ch)]
+                l_padded = np.pad(l, pad_shape, constant_values=0.0)
+                ones_of_shape = np.full(local_ch, num_examples[i])
                 
-                if all(l.shape == () for l in layer_updates):
-                    return np.array(float(np.sum(layer_updates)) / np.sum(num_examples))
-                
-                max_ch = np.max([np.shape(l) for l in layer_updates], axis=0)
-                layer_agg = np.zeros(max_ch)
-                count_layer = np.zeros(max_ch)  # to average by num of models that size
-                for i, l in enumerate(layer_updates):
-                    local_ch = np.shape(l)
-                    pad_shape = [(0, a) for a in (max_ch - local_ch)]
-                    l_padded = np.pad(l, pad_shape, constant_values=0.0)
-                    ones_of_shape = np.full(local_ch, num_examples[i])
+                if label_split != None:
                     
-                    if label_split != None:
-                        
-                        temp_l_padded = np.zeros(l_padded.shape)
-                        temp_l_padded[label_split[i]] = l_padded[label_split[i]]
-                        l_padded = temp_l_padded
+                    temp_l_padded = np.zeros(l_padded.shape)
+                    temp_l_padded[label_split[i]] = l_padded[label_split[i]]
+                    l_padded = temp_l_padded
 
-                        temp_this_layer_count = np.zeros(ones_of_shape.shape)
-                        temp_this_layer_count[label_split[i]] = ones_of_shape[label_split[i]]
-                        ones_of_shape = temp_this_layer_count
+                    temp_this_layer_count = np.zeros(ones_of_shape.shape)
+                    temp_this_layer_count[label_split[i]] = ones_of_shape[label_split[i]]
+                    ones_of_shape = temp_this_layer_count
 
-                    ones_pad = np.pad(ones_of_shape, pad_shape, constant_values=0.0)
-                    count_layer = np.add(count_layer, ones_pad)
-                    layer_agg = np.add(layer_agg, l_padded)
-                if np.any(count_layer == 0.0):
-                    print(count_layer)
-                    count_layer = np.where(count_layer == 0, 1, count_layer)
-                    # raise ValueError("Diving with 0")
-                layer_agg = layer_agg / count_layer
-                return layer_agg
+                ones_pad = np.pad(ones_of_shape, pad_shape, constant_values=0.0)
+                count_layer = np.add(count_layer, ones_pad)
+                layer_agg = np.add(layer_agg, l_padded)
+            if np.any(count_layer == 0.0):
+                print(count_layer)
+                count_layer = np.where(count_layer == 0, 1, count_layer)
+                # raise ValueError("Diving with 0")
+            layer_agg = layer_agg / count_layer
+            return layer_agg
 
-            self.prev_utility = [(cp.cid, fit_res.metrics['statistical_utility']) for cp, fit_res in results]
-            # Create a list of weights, each multiplied by the related number of examples
-            weighted_weights = [
-                [layer * fit_res.num_examples for layer in parameters_to_ndarrays(fit_res.parameters)] for _ , fit_res in results
-            ]
+        self.prev_utility = [(cp.cid, fit_res.metrics['statistical_utility']) for cp, fit_res in results]
+        # Create a list of weights, each multiplied by the related number of examples
+        weighted_weights = [
+            [layer * fit_res.num_examples for layer in parameters_to_ndarrays(fit_res.parameters)] for _ , fit_res in results
+        ]
 
-            global_values = []
-            for v in self.model.state_dict().values():
-                global_values.append(copy.deepcopy(v))
+        global_values = []
+        for v in self.model.state_dict().values():
+            global_values.append(copy.deepcopy(v))
 
-            num_layers = len(weighted_weights[0])
+        num_layers = len(weighted_weights[0])
+        
+        num_examples = [fit_res.num_examples for _, fit_res in results]
+        # to calculate missing labels
+        label_split = [fit_res.metrics['label_split'].type(torch.int) for _, fit_res in results]
+        flat_label_split = torch.cat([t.view(-1) for t in label_split])
+        unique_labels = torch.unique(flat_label_split)
+        all_labels = torch.arange(10)
+        missing_labels = torch.tensor(list(set(all_labels.tolist()) - set(unique_labels.tolist())))
+        missing_labels = missing_labels.type(torch.int)
+        print(f'missing labels = {missing_labels}, type of missing lables = {type(missing_labels)}')
+
+
+        agg_layers = []
+        for i, l in enumerate(zip(*weighted_weights), start=1):
+            if(i >= num_layers - 1): 
+                agg_layers.append(aggregate_layer(l, num_examples, label_split))
+            else:
+                agg_layers.append(aggregate_layer(l, num_examples))
+        
+        # keep the rest of global parameters as it is
+        
+        for i , layer in enumerate(agg_layers):
+            layer = torch.from_numpy(layer).type(torch.float)
             
-            num_examples = [fit_res.num_examples for _, fit_res in results]
-            # to calculate missing labels
-            label_split = [fit_res.metrics['label_split'].type(torch.int) for _, fit_res in results]
-            flat_label_split = torch.cat([t.view(-1) for t in label_split])
-            unique_labels = torch.unique(flat_label_split)
-            all_labels = torch.arange(10)
-            missing_labels = torch.tensor(list(set(all_labels.tolist()) - set(unique_labels.tolist())))
-            missing_labels = missing_labels.type(torch.int)
-            print(f'missing labels = {missing_labels}, type of missing lables = {type(missing_labels)}')
+            if (i >= num_layers - 1 and missing_labels.size > 0):
+                layer[missing_labels] = global_values[i][missing_labels]
 
+            if layer.dim() == 0:
+                global_values[i] = layer
+            else:
+                layer_shape = layer.shape
+                slices = [slice(0, dim) for dim in layer_shape]
+                global_values[i][slices] = layer
+        
+        new_state_dict = {}
+        for i , k in enumerate(self.model.state_dict().keys()):
+            new_state_dict[k] = global_values[i]
+        self.model.load_state_dict(new_state_dict, strict=True)
+        
 
-            agg_layers = []
-            for i, l in enumerate(zip(*weighted_weights), start=1):
-                if(i >= num_layers - 1): 
-                    agg_layers.append(aggregate_layer(l, num_examples, label_split))
-                else:
-                    agg_layers.append(aggregate_layer(l, num_examples))
-            
-            # keep the rest of global parameters as it is
-            
-            for i , layer in enumerate(agg_layers):
-                layer = torch.from_numpy(layer).type(torch.float)
-                
-                if (i >= num_layers - 1 and missing_labels.numel() > 0):
-                    layer[missing_labels] = global_values[i][missing_labels]
+        for i in range(len(global_values)):
+            global_values[i] = global_values[i].numpy()
 
-                if layer.dim() == 0:
-                    global_values[i] = layer
-                else:
-                    layer_shape = layer.shape
-                    slices = [slice(0, dim) for dim in layer_shape]
-                    global_values[i][slices] = layer
-            
-            new_state_dict = {}
-            for i , k in enumerate(self.model.state_dict().keys()):
-                new_state_dict[k] = global_values[i]
-            self.model.load_state_dict(new_state_dict, strict=True)
-            
-
-            for i in range(len(global_values)):
-                global_values[i] = global_values[i].numpy()
-
-            return ndarrays_to_parameters(global_values) , {}
+        return ndarrays_to_parameters(global_values) , {}
 
     def aggregate_evaluate(
         self,

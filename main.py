@@ -146,7 +146,8 @@ def simulate_fl_training(experiment: Experiment, device: torch.device, cfg: Dict
         return loss, {"accuracy": accuracy}
 
    
-    model_rates = [1, 0.5, 0.25, 0.125, 0.0625]
+    # model_rates = [1, 0.5, 0.25, 0.125, 0.0625]
+    model_rates = [1, 0.875, 0.75, 0.625, 0.5, 0.375, 0.25, 0.125, 0.0625]
     client_to_param_index = {i: [v.shape for _, v in create_model(cfg.Scenario, i).state_dict().items()] for i in model_rates}
     client_to_batches = [len(client_train_loader) for client_train_loader in trainloaders]
 

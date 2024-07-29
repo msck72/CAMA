@@ -55,6 +55,7 @@ class FedZeroCM(fl.server.ClientManager):
         self.time_now = None
         self.total_carbon_foorprint = 0
         self.client_to_batches = client_to_batches
+        self.carbon_foot_print_history = {}
         # self.client_history = {client : {'weighted_p_c' : 0, } for client in all_clients}
         # self._clients_to_cid = clients_to_cid
 
@@ -138,10 +139,18 @@ class FedZeroCM(fl.server.ClientManager):
             with self._cv:
                 self._cv.notify_all()
 
+    # def all(self) -> Dict[str, ClientProxy]:
+    #     """Return all available clients."""
+    #     return self.clients
+
     def all(self) -> Dict[str, ClientProxy]:
         """Return all available clients."""
-        return self.clients
-
+        all_clients = self.client_load_api.get_clients()
+        clnts_as_np_clnts = []
+        for clnt in all_clients:
+            clnts_as_np_clnts.append(self.clients[clnt.name])
+        return random.sample(clnts_as_np_clnts, 10)
+        # return clnts_as_np_clnts
 
     def sample(
         self,
@@ -150,6 +159,7 @@ class FedZeroCM(fl.server.ClientManager):
         prev_rnd_clnts_stat_util: List[Tuple[str, float]], 
         min_num_clients: Optional[int] = None,
         criterion: Optional[Criterion] = None,
+        get_all_available_clients = False
     ) -> List[ClientProxy]:
         
         if server_round > 0:
@@ -197,26 +207,37 @@ class FedZeroCM(fl.server.ClientManager):
         
         filtered_clients = filtered_clients[:num_clients]
         carbon_footprint_till_now = 0
-        mean_batches = np.mean([self.client_to_batches[int(client.name.split('_')[0])] for client, _ in filtered_clients])
         
+        division = _divide_batches_to_class([exp_btcs for _, exp_btcs in filtered_clients])
+
         for client, expected_batches in filtered_clients:
             batches_in_client = self.client_to_batches[int(client.name.split('_')[0])] * self.cfg.Simulation.EPOCHS
-            carbon_footprint_till_now += client.record_usage(batches_in_client, _batches_to_class(expected_batches, mean_batches, server_round))
+            carbon_footprint_till_now += client.record_usage( batches_in_client, _batches_to_class(expected_batches, division))
 
-        self.total_carbon_foorprint += _ws_to_kwh(carbon_footprint_till_now)
 
+        this_round_carbon_footprint = _ws_to_kwh(carbon_footprint_till_now)
+        self.total_carbon_foorprint += this_round_carbon_footprint
+        #carbon footprint history
+        self.carbon_foot_print_history[server_round] = this_round_carbon_footprint
+        
+
+
+
+        # print('testing carbon footprint = ', _ws_to_kwh(sum(client.participated_batches * client.energy_per_batch for client in self.client_load_api.get_clients())))
         print(f"carbon_footprint till now ({server_round}) = ",  self.total_carbon_foorprint)
-        cids_filtered_clients = self._clients_to_numpy_clients(filtered_clients, mean_batches, server_round)
+        #print the carbon footprint history
+        print(f"carbon footprint history = ", self.carbon_foot_print_history)
+
+        cids_filtered_clients = self._clients_to_numpy_clients(filtered_clients, division)
 
         filtered_client_proxies = []
-        for cpr, model_rate in cids_filtered_clients:
-            cpr.properties['model_rate'] = model_rate
+        for cpr, model_size in cids_filtered_clients:
+            cpr.properties['model_rate'] = model_size
             filtered_client_proxies.append(cpr)
         
         selected_clients = filtered_client_proxies[:num_clients]
         if (len(selected_clients) >= self.cfg.Simulation.CLIENTS_PER_ROUND):
             selected_clients = selected_clients[:self.cfg.Simulation.CLIENTS_PER_ROUND]
-
 
         # Update selection history
         for client in selected_clients:
@@ -243,10 +264,10 @@ class FedZeroCM(fl.server.ClientManager):
 
         return selected_clients
 
-    def _clients_to_numpy_clients(self, clients, mean_batches, server_round):
+    def _clients_to_numpy_clients(self, clients, division):
         cids = []
         for clnt, batches in clients:
-            cids.append((self.clients[clnt.name], _batches_to_class(batches, mean_batches, server_round)))
+            cids.append((self.clients[clnt.name], _batches_to_class(batches, division)))
         return cids
     
 
@@ -308,6 +329,9 @@ def _filterby_forecasted_capacity_and_energy(power_domain_api: PowerDomainApi,
                                              client_load_api: ClientLoadApi,
                                              clients: List[Client],
                                              now: datetime, cfg: DictConfig) -> List[Tuple[Client, float]]:
+    print("Manasa nuvvu unde chote cheppamma")
+    print(clients)
+    print("\n\n")
     filtered_clients: List[Tuple[Client, float]] = []
     to_print = []
 
@@ -320,15 +344,62 @@ def _filterby_forecasted_capacity_and_energy(power_domain_api: PowerDomainApi,
             to_print.append(client)
     filtered_clients = sorted(filtered_clients, key=_sort_key, reverse=True)
 
+    # append the filtered clients to filtered_clients.txt file
+    # with open("filtered_clients.txt", "a") as f:
+    #     f.write(f"Round {now} - Filtered clients: {filtered_clients}\n")
+
     with open("filtered_clients.txt", "a") as f:
         f.write(f"clients after removing excluded clients {str(clients)}\n")
         f.write(f"filtered by forcasted clients {str(now)}  and num_of_clients = {len(filtered_clients)}\n")
         f.write(str(to_print))
+        # f.write(f"\ntotal_max_batches = {to_print_total_max_batches}\n")
         f.write("\n\n")
     
     return filtered_clients
 
+
+# def _filterby_forecasted_capacity_and_energy(power_domain_api: PowerDomainApi,
+    #                                          client_load_api: ClientLoadApi,
+    #                                          clients: List[Client],
+    #                                          now: datetime,
+    #                                          cfg: DictConfig) -> List[Tuple[Client, float]]:
+    #                                         #  d: int,
+    #                                         #  min_epochs: float) -> List[Client]:
+    
+    # filtered_clients: List[Client] = []
+    # to_print = []
+    # to_print_total_max_batches = []
+    # for client in clients:
+    #     possible_batches = client_load_api.forecast(now, duration_in_timesteps=_DURATION, client_name=client.name, cfg=cfg)
+    #     ree_powered_batches = power_domain_api.forecast(now, duration_in_timesteps=_DURATION, zone=client.zone, cfg = cfg) / client.energy_per_batch
+    #     # Significantly faster than pandas
+    #     total_max_batches = np.minimum(possible_batches.values, ree_powered_batches.values).sum()
+    #     to_print_total_max_batches.append(total_max_batches)
+    #     if total_max_batches >= client.batches_per_epoch * 1:
+    #         filtered_clients.append((client, total_max_batches))
+    #         to_print.append(client)
+    
+
+
+    # with open("filtered_clients.txt", "a") as f:
+    #     f.write(f"clients after removing excluded clients {str(clients)}\n")
+    #     f.write(f"filtered by forcasted clients {str(now)}  and num_of_clients = {len(filtered_clients)}\n")
+    #     f.write(str(to_print))
+    #     f.write(f"\ntotal_max_batches = {to_print_total_max_batches}\n")
+    #     f.write("\n\n")
+
+    # print("\n\nKhaansaar ka Salaaaaaar")
+    # #open a txt file to append the filtered clients 
+   
+
+    # print(filtered_clients)
+    # print("\n\n")
+    # return filtered_clients
+
+
+
 def _sort_key(client):
+    # return client.batches_per_timestep * client.energy_per_batch
     return client[1]
 
 def _has_more_resources_in_future(possible_batches, ree_powered_batches):
@@ -336,35 +407,29 @@ def _has_more_resources_in_future(possible_batches, ree_powered_batches):
     batches_if_selected = min(possible_batches.to_list()[0], ree_powered_batches.to_list()[0])
     return (False, batches_if_selected) if (total_max_batches == batches_if_selected) else (True, 0)
 
-
-def _batches_to_class(batches, mean_batches, server_round):
-    # Normalize batches relative to the mean
-    relative_batches = batches / mean_batches
-
-    # Adjust classification thresholds based on server round
-    round_factor = min(1, server_round / 100)  # Caps at 1 after 100 rounds
-    
-    # Use more granular and evenly distributed thresholds
-    thresholds = [
-        0.4 * (1 - 0.2 * round_factor),
-        0.7 * (1 - 0.15 * round_factor),
-        1.0 * (1 - 0.1 * round_factor),
-        1.3 * (1 + 0.1 * round_factor),
-        1.6 * (1 + 0.15 * round_factor)
-    ]
-
-    if relative_batches < thresholds[0]:
-        return 0.0625
-    elif relative_batches < thresholds[1]:
-        return 0.125
-    elif relative_batches < thresholds[2]:
-        return 0.25
-    elif relative_batches < thresholds[3]:
-        return 0.5
-    # elif relative_batches < thresholds[4]:
-    #     return 1.0
-    else:
-        return 1.0
+def _batches_to_class(batches, division):
+    # return 1
+    model_size = 1
+    for i in division:
+        if batches >= i:
+            return model_size
+        model_size /= 2
+    # if batches <= 10:
+    #     return 0.0625
+    # elif batches <= 20:
+    #     return 0.125
+    # elif batches <= 30:
+    #     return 0.25
+    # elif batches <= 40:
+    #     return 0.5
+    # else:
+    #     return 1
+    return 0.0625
 
 def _ws_to_kwh(ws: float) -> float:
     return ws / 3600 / 1000
+
+
+def _divide_batches_to_class(exp_batches):
+    sorted_batches = sorted(exp_batches, reverse = True)
+    return sorted_batches[1::2]

@@ -47,7 +47,6 @@ class FlowerNumPyClient(fl.client.NumPyClient):
         self.model = create_model(self.cfg.Scenario, model_rate=config['model_rate'], device=self.device)
         set_parameters(self.model, parameters)
         stat_util = train(self.model, self.train_loader, self.label_split, self.cfg, self.device )
-        print(f'loss, accuracy for {config["model_rate"]} model, {test(self.model, self.test_loader, device=self.device)}')
         return get_parameters(self.model), len(self.train_loader), {'model_rate': config['model_rate'], 'label_split': self.label_split, 'statistical_utility': stat_util}
 
     def evaluate(self, parameters, config) -> Tuple[float, int, Dict]:

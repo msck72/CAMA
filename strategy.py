@@ -10,6 +10,7 @@ from models import copy_gp_to_lp
 import numpy as np
 import copy
 import torch
+from collections import OrderedDict
 
 from flwr.common import (
     EvaluateIns,
@@ -237,97 +238,66 @@ class FedZero(Strategy):
         failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """Aggregate fit results using weighted average."""
-        print(f'In Aggregate Tiger Nageswara rao and number of client proxys = {len(results)}')
+        global_parameters = self.model.state_dict()
+        label_split_all = [fit_res.metrics['label_split'].type(torch.int) for _, fit_res in results]
+        num_examples = [fit_res.num_examples for _, fit_res in results]
 
-        def aggregate_layer(layer_updates, num_examples, label_split = None):
-            
-            if all(l.shape == () for l in layer_updates):
-                return np.array(float(np.sum(layer_updates)) / np.sum(num_examples))
-            
-            max_ch = np.max([np.shape(l) for l in layer_updates], axis=0)
-            layer_agg = np.zeros(max_ch)
-            count_layer = np.zeros(max_ch)  # to average by num of models that size
-            for i, l in enumerate(layer_updates):
-                local_ch = np.shape(l)
-                pad_shape = [(0, a) for a in (max_ch - local_ch)]
-                l_padded = np.pad(l, pad_shape, constant_values=0.0)
-                ones_of_shape = np.full(local_ch, num_examples[i])
-                
-                if label_split != None:
-                    
-                    temp_l_padded = np.zeros(l_padded.shape)
-                    temp_l_padded[label_split[i]] = l_padded[label_split[i]]
-                    l_padded = temp_l_padded
+        local_parameters = _create_local_parameters(self.model.state_dict().keys(), results)
+        
+        param_idx = _calculate_param_idx(self.model.state_dict(), local_parameters)
 
-                    temp_this_layer_count = np.zeros(ones_of_shape.shape)
-                    temp_this_layer_count[label_split[i]] = ones_of_shape[label_split[i]]
-                    ones_of_shape = temp_this_layer_count
-
-                ones_pad = np.pad(ones_of_shape, pad_shape, constant_values=0.0)
-                count_layer = np.add(count_layer, ones_pad)
-                layer_agg = np.add(layer_agg, l_padded)
-            if np.any(count_layer == 0.0):
-                print(count_layer)
-                count_layer = np.where(count_layer == 0, 1, count_layer)
-                # raise ValueError("Diving with 0")
-            layer_agg = layer_agg / count_layer
-            return layer_agg
+        count = OrderedDict()
+        for k, v in global_parameters.items():
+            #   print(f'{k}   {v.shape}')
+              parameter_type = k.split('.')[-1]
+              count[k] = v.new_zeros(v.size(), dtype=torch.float32)
+              tmp_v = v.new_zeros(v.size(), dtype=torch.float32)
+              for m in range(len(local_parameters)):
+                  if 'weight' in parameter_type or 'bias' in parameter_type:
+                      if parameter_type == 'weight':
+                          if v.dim() > 1:
+                              if 'linear' in k:
+                                  label_split = label_split_all[m]
+                                  param_idx[m][k] = list(param_idx[m][k])
+                                  # print(type(param_idx[m][k][0]))
+                                #   print('label_split = ', label_split)
+                                #   print(f'{type(param_idx[m][k][0])}, {param_idx[m][k][0]}')
+                                  param_idx[m][k][0] = param_idx[m][k][0][label_split]
+                                #   print(f'{type(label_split)}, {label_split}')
+                                #   print(param_idx[m][k])
+                                  tmp_v[torch.meshgrid(param_idx[m][k])] += local_parameters[m][k][label_split]
+                                  count[k][torch.meshgrid(param_idx[m][k])] += num_examples[m]
+                              else:
+                                  tmp_v[torch.meshgrid(param_idx[m][k])] += local_parameters[m][k]
+                                  count[k][torch.meshgrid(param_idx[m][k])] += num_examples[m]
+                          else:
+                              tmp_v[param_idx[m][k]] += local_parameters[m][k]
+                              count[k][param_idx[m][k]] += num_examples[m]
+                      else:
+                          if 'linear' in k:
+                              label_split = label_split_all[m]
+                            #   print(f'{type(label_split)}, {label_split}')
+                            #   print(param_idx[m][k])
+                              param_idx[m][k] = param_idx[m][k][0]
+                              param_idx[m][k] = param_idx[m][k][label_split]
+                              tmp_v[param_idx[m][k]] += local_parameters[m][k][label_split]
+                              count[k][param_idx[m][k]] += num_examples[m]
+                          else:
+                              tmp_v[param_idx[m][k]] += local_parameters[m][k]
+                              count[k][param_idx[m][k]] += num_examples[m]
+                  else:
+                      tmp_v[param_idx[m][k]] += local_parameters[m][k]
+                      count[k][param_idx[m][k]] += num_examples[m]
+              tmp_v[count[k] > 0] = tmp_v[count[k] > 0].div_(count[k][count[k] > 0])
+              v[count[k] > 0] = tmp_v[count[k] > 0].to(v.dtype)
 
         self.prev_utility = [(cp.cid, fit_res.metrics['statistical_utility']) for cp, fit_res in results]
-        # Create a list of weights, each multiplied by the related number of examples
-        weighted_weights = [
-            [layer * fit_res.num_examples for layer in parameters_to_ndarrays(fit_res.parameters)] for _ , fit_res in results
-        ]
 
         global_values = []
         for v in self.model.state_dict().values():
-            global_values.append(copy.deepcopy(v))
+            global_values.append(v.numpy())
 
-        num_layers = len(weighted_weights[0])
-        
-        num_examples = [fit_res.num_examples for _, fit_res in results]
-        # to calculate missing labels
-        label_split = [fit_res.metrics['label_split'].type(torch.int) for _, fit_res in results]
-        flat_label_split = torch.cat([t.view(-1) for t in label_split])
-        unique_labels = torch.unique(flat_label_split)
-        all_labels = torch.arange(10)
-        missing_labels = torch.tensor(list(set(all_labels.tolist()) - set(unique_labels.tolist())))
-        missing_labels = missing_labels.type(torch.int)
-        print(f'missing labels = {missing_labels}, type of missing lables = {type(missing_labels)}')
-
-
-        agg_layers = []
-        for i, l in enumerate(zip(*weighted_weights), start=1):
-            if(i >= num_layers - 1): 
-                agg_layers.append(aggregate_layer(l, num_examples, label_split))
-            else:
-                agg_layers.append(aggregate_layer(l, num_examples))
-        
-        # keep the rest of global parameters as it is
-        
-        for i , layer in enumerate(agg_layers):
-            layer = torch.from_numpy(layer).type(torch.float)
-            
-            if (i >= num_layers - 1 and missing_labels.size > 0):
-                layer[missing_labels] = global_values[i][missing_labels]
-
-            if layer.dim() == 0:
-                global_values[i] = layer
-            else:
-                layer_shape = layer.shape
-                slices = [slice(0, dim) for dim in layer_shape]
-                global_values[i][slices] = layer
-        
-        new_state_dict = {}
-        for i , k in enumerate(self.model.state_dict().keys()):
-            new_state_dict[k] = global_values[i]
-        self.model.load_state_dict(new_state_dict, strict=True)
-        
-
-        for i in range(len(global_values)):
-            global_values[i] = global_values[i].numpy()
-
-        return ndarrays_to_parameters(global_values) , {}
+        return ndarrays_to_parameters(global_values), {}
 
     def aggregate_evaluate(
         self,
@@ -359,3 +329,35 @@ class FedZero(Strategy):
             log(WARNING, "No evaluate_metrics_aggregation_fn provided")
 
         return loss_aggregated, metrics_aggregated
+    
+
+def _calculate_param_idx(global_model, local_models):
+    param_idx = {}
+    for m, local_model in enumerate(local_models):
+        param_idx[m] = {}
+        for (name, global_param), (_, local_param) in zip(global_model.items(), local_model.items()):
+            if global_param.shape == local_param.shape:
+                param_idx[m][name] = tuple(torch.arange(s) for s in global_param.shape)
+            else:
+                indices = []
+                for g_dim, l_dim in zip(global_param.shape, local_param.shape):
+                    if g_dim == l_dim:
+                        indices.append(torch.arange(g_dim))
+                    else:
+                        # start = (g_dim - l_dim) // 2
+                        start = l_dim
+                        indices.append(torch.arange(0, l_dim))
+                param_idx[m][name] = tuple(indices)
+    return param_idx
+
+
+
+
+def _create_local_parameters(global_model_keys, results):
+    local_parameters = [OrderedDict() for _ in results]
+
+    for i, (_, fit_res) in enumerate(results):
+        for k , v in zip(global_model_keys, parameters_to_ndarrays(fit_res.parameters)):
+            local_parameters[i][k] = v * fit_res.num_examples
+
+    return local_parameters

@@ -3,7 +3,7 @@ Simulation:
   SAVE_TRAINED_MODELS: False
   TIMESTEP_IN_MIN: 1
   MAX_ROUND_IN_MIN: 60
-  MAX_ROUNDS: 10
+  MAX_ROUNDS: 15
   MAX_TIME_IN_DAYS: 7
   STOPPING_CRITERIA: None
   NUM_CLIENTS: 100
@@ -36,7 +36,7 @@ optim_scheduler:
 
 RAY_CLIENT_RESOURCES:
   num_cpus: 1
-  num_gpus: 0.4
+  num_gpus: 0
 
 RAY_INIT_ARGS:
   ignore_reinit_error: True

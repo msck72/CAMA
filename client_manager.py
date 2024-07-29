@@ -354,13 +354,13 @@ def _batches_to_class(batches, mean_batches, server_round):
     ]
 
     if relative_batches < thresholds[0]:
-        return 0.5
+        return 0.0625
     elif relative_batches < thresholds[1]:
-        return 0.625
+        return 0.125
     elif relative_batches < thresholds[2]:
-        return 0.75
+        return 0.25
     elif relative_batches < thresholds[3]:
-        return 1.0
+        return 0.5
     # elif relative_batches < thresholds[4]:
     #     return 1.0
     else:

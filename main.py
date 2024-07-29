@@ -1,5 +1,6 @@
 import os
 from dataclasses import dataclass
+import time
 from typing import Dict, Optional
 
 import click
@@ -138,6 +139,18 @@ def simulate_fl_training(experiment: Experiment, device: torch.device, cfg: Dict
     def server_eval_fn(server_round: int, parameters: flwr.common.NDArrays, config: Dict[str, flwr.common.Scalar]):
         net = create_model(cfg=cfg.Scenario, model_rate=1, device=device)
         set_parameters(net, parameters)  # Update model with the latest parameters
+        
+        print("start of going through trainset")
+        start_time = time.time()
+        with torch.no_grad():
+            net.train(True)
+            for images, labels in trainloader:
+                input_dict = {}
+                input_dict["img"] = images.to(device)
+                input_dict["label"] = labels.to(device)
+                net(input_dict)
+        print(f"end of going through trainset time taken = {time.time() - start_time}")
+        
         loss, accuracy = test(net, testloader, device=device)
         net_state_dict = net.state_dict()
         if cfg.Simulation['SAVE_TRAINED_MODELS'] and net_state_dict is not None:
@@ -146,8 +159,7 @@ def simulate_fl_training(experiment: Experiment, device: torch.device, cfg: Dict
         return loss, {"accuracy": accuracy}
 
    
-    # model_rates = [1, 0.5, 0.25, 0.125, 0.0625]
-    model_rates = [1, 0.875, 0.75, 0.625, 0.5, 0.375, 0.25, 0.125, 0.0625]
+    model_rates = [1, 0.5, 0.25, 0.125, 0.0625]
     client_to_param_index = {i: [v.shape for _, v in create_model(cfg.Scenario, i).state_dict().items()] for i in model_rates}
     client_to_batches = [len(client_train_loader) for client_train_loader in trainloaders]
 

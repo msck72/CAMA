@@ -50,10 +50,14 @@ class FedZeroCM(fl.server.ClientManager):
         self.cycle_active_clients = set()
         self.cycle_participation_mean = 0
 
+        # all_clients = self.client_load_api.get_clients()
 
         self.time_now = None
         self.total_carbon_foorprint = 0
         self.client_to_batches = client_to_batches
+        self.carbon_foot_print_history = {}
+        # self.client_history = {client : {'weighted_p_c' : 0, } for client in all_clients}
+        # self._clients_to_cid = clients_to_cid
 
 
     def __len__(self) -> int:
@@ -135,18 +139,18 @@ class FedZeroCM(fl.server.ClientManager):
             with self._cv:
                 self._cv.notify_all()
 
-    def all(self) -> Dict[str, ClientProxy]:
-        """Return all available clients."""
-        return self.clients
-
     # def all(self) -> Dict[str, ClientProxy]:
     #     """Return all available clients."""
-    #     all_clients = self.client_load_api.get_clients()
-    #     clnts_as_np_clnts = []
-    #     for clnt in all_clients:
-    #         clnts_as_np_clnts.append(self.clients[clnt.name])
-    #     return random.sample(clnts_as_np_clnts, 10)
-    #     # return clnts_as_np_clnts
+    #     return self.clients
+
+    def all(self) -> Dict[str, ClientProxy]:
+        """Return all available clients."""
+        all_clients = self.client_load_api.get_clients()
+        clnts_as_np_clnts = []
+        for clnt in all_clients:
+            clnts_as_np_clnts.append(self.clients[clnt.name])
+        return random.sample(clnts_as_np_clnts, 10)
+        # return clnts_as_np_clnts
 
     def sample(
         self,
@@ -210,10 +214,20 @@ class FedZeroCM(fl.server.ClientManager):
             batches_in_client = self.client_to_batches[int(client.name.split('_')[0])] * self.cfg.Simulation.EPOCHS
             carbon_footprint_till_now += client.record_usage( batches_in_client, _batches_to_class(expected_batches, division))
 
-        self.total_carbon_foorprint += _ws_to_kwh(carbon_footprint_till_now)
+
+        this_round_carbon_footprint = _ws_to_kwh(carbon_footprint_till_now)
+        self.total_carbon_foorprint += this_round_carbon_footprint
+        #carbon footprint history
+        self.carbon_foot_print_history[server_round] = this_round_carbon_footprint
+        
+
+
 
         # print('testing carbon footprint = ', _ws_to_kwh(sum(client.participated_batches * client.energy_per_batch for client in self.client_load_api.get_clients())))
         print(f"carbon_footprint till now ({server_round}) = ",  self.total_carbon_foorprint)
+        #print the carbon footprint history
+        print(f"carbon footprint history = ", self.carbon_foot_print_history)
+
         cids_filtered_clients = self._clients_to_numpy_clients(filtered_clients, division)
 
         filtered_client_proxies = []
@@ -262,6 +276,8 @@ class FedZeroCM(fl.server.ClientManager):
         exclusion_factor = self.cfg.client_selection.exclusion_factor
         rng = np.random.default_rng(seed=self.cfg.Scenario.seed)
 
+        # for client in clients:
+        #     print(f'client name = {client.name}', client.participated_in_last_round(round_number))
         participants = {client for client in clients if client.participated_in_last_round(round_number)}
 
         if not participants:
@@ -313,6 +329,7 @@ def _filterby_forecasted_capacity_and_energy(power_domain_api: PowerDomainApi,
                                              client_load_api: ClientLoadApi,
                                              clients: List[Client],
                                              now: datetime, cfg: DictConfig) -> List[Tuple[Client, float]]:
+    print("Manasa nuvvu unde chote cheppamma")
     print(clients)
     print("\n\n")
     filtered_clients: List[Tuple[Client, float]] = []
@@ -327,17 +344,62 @@ def _filterby_forecasted_capacity_and_energy(power_domain_api: PowerDomainApi,
             to_print.append(client)
     filtered_clients = sorted(filtered_clients, key=_sort_key, reverse=True)
 
+    # append the filtered clients to filtered_clients.txt file
+    # with open("filtered_clients.txt", "a") as f:
+    #     f.write(f"Round {now} - Filtered clients: {filtered_clients}\n")
 
     with open("filtered_clients.txt", "a") as f:
         f.write(f"clients after removing excluded clients {str(clients)}\n")
         f.write(f"filtered by forcasted clients {str(now)}  and num_of_clients = {len(filtered_clients)}\n")
         f.write(str(to_print))
+        # f.write(f"\ntotal_max_batches = {to_print_total_max_batches}\n")
         f.write("\n\n")
     
     return filtered_clients
 
 
+# def _filterby_forecasted_capacity_and_energy(power_domain_api: PowerDomainApi,
+    #                                          client_load_api: ClientLoadApi,
+    #                                          clients: List[Client],
+    #                                          now: datetime,
+    #                                          cfg: DictConfig) -> List[Tuple[Client, float]]:
+    #                                         #  d: int,
+    #                                         #  min_epochs: float) -> List[Client]:
+    
+    # filtered_clients: List[Client] = []
+    # to_print = []
+    # to_print_total_max_batches = []
+    # for client in clients:
+    #     possible_batches = client_load_api.forecast(now, duration_in_timesteps=_DURATION, client_name=client.name, cfg=cfg)
+    #     ree_powered_batches = power_domain_api.forecast(now, duration_in_timesteps=_DURATION, zone=client.zone, cfg = cfg) / client.energy_per_batch
+    #     # Significantly faster than pandas
+    #     total_max_batches = np.minimum(possible_batches.values, ree_powered_batches.values).sum()
+    #     to_print_total_max_batches.append(total_max_batches)
+    #     if total_max_batches >= client.batches_per_epoch * 1:
+    #         filtered_clients.append((client, total_max_batches))
+    #         to_print.append(client)
+    
+
+
+    # with open("filtered_clients.txt", "a") as f:
+    #     f.write(f"clients after removing excluded clients {str(clients)}\n")
+    #     f.write(f"filtered by forcasted clients {str(now)}  and num_of_clients = {len(filtered_clients)}\n")
+    #     f.write(str(to_print))
+    #     f.write(f"\ntotal_max_batches = {to_print_total_max_batches}\n")
+    #     f.write("\n\n")
+
+    # print("\n\nKhaansaar ka Salaaaaaar")
+    # #open a txt file to append the filtered clients 
+   
+
+    # print(filtered_clients)
+    # print("\n\n")
+    # return filtered_clients
+
+
+
 def _sort_key(client):
+    # return client.batches_per_timestep * client.energy_per_batch
     return client[1]
 
 def _has_more_resources_in_future(possible_batches, ree_powered_batches):
@@ -352,11 +414,21 @@ def _batches_to_class(batches, division):
         if batches >= i:
             return model_size
         model_size /= 2
-
+    # if batches <= 10:
+    #     return 0.0625
+    # elif batches <= 20:
+    #     return 0.125
+    # elif batches <= 30:
+    #     return 0.25
+    # elif batches <= 40:
+    #     return 0.5
+    # else:
+    #     return 1
     return 0.0625
 
 def _ws_to_kwh(ws: float) -> float:
     return ws / 3600 / 1000
+
 
 def _divide_batches_to_class(exp_batches):
     sorted_batches = sorted(exp_batches, reverse = True)

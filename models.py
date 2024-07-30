@@ -7,14 +7,14 @@ import numpy as np
 from flwr.common import parameters_to_ndarrays
 
 
-def create_model(cfg, model_rate, device= torch.device('cpu'))  :
+def create_model(cfg, model_rate, device= torch.device('cpu'), track=False)  :
     # print('model being created')
     if(cfg.dataset == 'mnist'):
         return conv(model_rate, [1, 28, 28], 10, cfg.hidden_layers, device)
     elif(cfg.dataset == 'cifar10'):
         # print(cfg.hidden_layers)
         # return conv(model_rate, [3, 32, 32], 10, cfg.hidden_layers, device)
-        return create_ResNet18(cfg.hidden_layers, model_rate, device)
+        return create_ResNet18(cfg.hidden_layers, model_rate, device, track=track)
     else:
         raise ValueError("Sorry no dataset_name is known")
     
@@ -155,6 +155,7 @@ class ResNet(nn.Module):
         super(ResNet, self).__init__()
         self.in_planes = hidden_layers[0]
         self.num_classes = num_classes
+        self.track = track
 
         self.conv1 = nn.Conv2d(3, hidden_layers[0], kernel_size=7, stride=1, padding=1, bias=False)
         self.bn1 = nn.BatchNorm2d(hidden_layers[0], momentum=None, track_running_stats = track)
@@ -168,7 +169,7 @@ class ResNet(nn.Module):
         strides = [stride] + [1] * (num_blocks - 1)
         layers = []
         for stride in strides:
-            layers.append(block(self.in_planes, int(planes), stride))
+            layers.append(block(self.in_planes, int(planes), stride, self.track))
             self.in_planes = planes * block.expansion
         return nn.Sequential(*layers)
 
@@ -194,12 +195,12 @@ class ResNet(nn.Module):
         # return output
         return out
 
-def create_ResNet18(hidden_layers, model_rate = 1, device = "cpu"):
+def create_ResNet18(hidden_layers, model_rate = 1, device = "cpu", track=False):
     hidden_layers = [int(layer * model_rate) for layer in hidden_layers]
     # print("is it float64??")
     # print(type(hidden_layers))
     # print(hidden_layers[0])
-    return ResNet(BasicBlock, hidden_layers=hidden_layers, num_blocks=[2, 2, 2, 2], model_rate=model_rate).to(device)
+    return ResNet(BasicBlock, hidden_layers=hidden_layers, num_blocks=[2, 2, 2, 2], model_rate=model_rate, track=track).to(device)
 
 
 def get_state_dict_from_param(model, parameters):

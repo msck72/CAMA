@@ -137,7 +137,7 @@ def simulate_fl_training(experiment: Experiment, device: torch.device, cfg: Dict
 
     # The `evaluate` function will be by Flower called after every round
     def server_eval_fn(server_round: int, parameters: flwr.common.NDArrays, config: Dict[str, flwr.common.Scalar]):
-        net = create_model(cfg=cfg.Scenario, model_rate=1, device=device)
+        net = create_model(cfg=cfg.Scenario, model_rate=1, device=device, track=True)
         set_parameters(net, parameters)  # Update model with the latest parameters
         
         print("start of going through trainset")

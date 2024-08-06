@@ -5,6 +5,7 @@ import torch.nn.functional as F
 import copy
 import numpy as np
 from flwr.common import parameters_to_ndarrays
+from utility import Scaler
 
 
 def create_model(cfg, model_rate, device= torch.device('cpu'), track=False)  :
@@ -128,7 +129,7 @@ def conv(
 class BasicBlock(nn.Module):
     expansion = 1
 
-    def __init__(self, in_planes, planes, stride=1, track=False):
+    def __init__(self, in_planes, planes, stride=1, rate = 1, track=False):
         super(BasicBlock, self).__init__()
         self.conv1 = nn.Conv2d(in_planes, planes, kernel_size=3, stride=stride, padding=1, bias=False)
         self.bn1 = nn.BatchNorm2d(planes, momentum=None, track_running_stats = track)
@@ -141,21 +142,23 @@ class BasicBlock(nn.Module):
                 nn.Conv2d(in_planes, self.expansion * planes, kernel_size=1, stride=stride, bias=False),
                 nn.BatchNorm2d(self.expansion * planes, momentum=None, track_running_stats = track)
             )
+        self.scaler = Scaler(rate)
 
     def forward(self, x):
-        out = torch.relu(self.bn1(self.conv1(x)))
-        out = self.bn2(self.conv2(out))
+        out = torch.relu(self.bn1(self.conv1(self.scaler(x))))
+        out = self.bn2(self.conv2(self.scaler(out)))
         out += self.shortcut(x)
         out = torch.relu(out)
         return out
 
 
 class ResNet(nn.Module):
-    def __init__(self, block, hidden_layers , num_blocks, num_classes=10, model_rate=1, track = False):
+    def __init__(self, block, hidden_layers , num_blocks, num_classes=10, model_rate=1, rate=1 , track = False):
         super(ResNet, self).__init__()
         self.in_planes = hidden_layers[0]
         self.num_classes = num_classes
         self.track = track
+        self.rate = rate
 
         self.conv1 = nn.Conv2d(3, hidden_layers[0], kernel_size=7, stride=1, padding=1, bias=False)
         self.bn1 = nn.BatchNorm2d(hidden_layers[0], momentum=None, track_running_stats = track)
@@ -164,18 +167,19 @@ class ResNet(nn.Module):
         self.layer3 = self._make_layer(block, hidden_layers[2] , num_blocks[2], stride=2)
         self.layer4 = self._make_layer(block, hidden_layers[3] , num_blocks[3], stride=2)
         self.linear = nn.Linear(int(hidden_layers[3] * block.expansion), num_classes)
+        self.scaler = Scaler(rate)
 
     def _make_layer(self, block, planes, num_blocks, stride):
         strides = [stride] + [1] * (num_blocks - 1)
         layers = []
         for stride in strides:
-            layers.append(block(self.in_planes, int(planes), stride, self.track))
+            layers.append(block(self.in_planes, int(planes), stride, self.rate, self.track))
             self.in_planes = planes * block.expansion
         return nn.Sequential(*layers)
 
     def forward(self, input_dict):
         x = input_dict['img']
-        out = torch.relu(self.bn1(self.conv1(x)))
+        out = torch.relu(self.bn1(self.conv1(self.scaler(x))))
         out = self.layer1(out)
         out = self.layer2(out)
         out = self.layer3(out)
@@ -200,7 +204,7 @@ def create_ResNet18(hidden_layers, model_rate = 1, device = "cpu", track=False):
     # print("is it float64??")
     # print(type(hidden_layers))
     # print(hidden_layers[0])
-    return ResNet(BasicBlock, hidden_layers=hidden_layers, num_blocks=[2, 2, 2, 2], model_rate=model_rate, track=track).to(device)
+    return ResNet(BasicBlock, hidden_layers=hidden_layers, num_blocks=[2, 2, 2, 2], model_rate=model_rate, rate=model_rate, track=track).to(device)
 
 
 def get_state_dict_from_param(model, parameters):

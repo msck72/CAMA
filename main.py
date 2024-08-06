@@ -138,7 +138,7 @@ def simulate_fl_training(experiment: Experiment, device: torch.device, cfg: Dict
     # The `evaluate` function will be by Flower called after every round
     def server_eval_fn(server_round: int, parameters: flwr.common.NDArrays, config: Dict[str, flwr.common.Scalar]):
         net = create_model(cfg=cfg.Scenario, model_rate=1, device=device, track=True)
-        set_parameters(net, parameters)  # Update model with the latest parameters
+        set_parameters(net, parameters, strict=False, keys=create_model(cfg=cfg.Scenario, model_rate=1, device=device).state_dict().keys())  # Update model with the latest parameters
         
         print("start of going through trainset")
         start_time = time.time()
@@ -170,7 +170,8 @@ def simulate_fl_training(experiment: Experiment, device: torch.device, cfg: Dict
     custom_model = create_model(cfg.Scenario, model_rate = 1)
 
     # Load compatible layers
-    custom_model.load_state_dict({k: v for k, v in zip(custom_model.state_dict().keys(), pretrained_model.state_dict().values())}, strict=True)
+    # custom_model.load_state_dict({k: v for k, v in zip(custom_model.state_dict().keys(), pretrained_model.state_dict().values())}, strict=True)
+    custom_model.load_state_dict(pretrained_model.state_dict(), strict=False)
     initial_params = get_parameters(custom_model)
 
     strategy = FedZero(

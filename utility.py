@@ -5,7 +5,7 @@ from typing import List, OrderedDict
 import torch
 import numpy as np
 from entities import Client
-
+import torch.nn as nn
 
 class UtilityJudge(ABC):
     """Generates a client utility weighting for each training round to mitigate biases introduced by FedZero.
@@ -100,11 +100,12 @@ def get_parameters(net) -> List[np.ndarray]:
     return [val.cpu().numpy() for _, val in net.state_dict().items()]
 
 
-def set_parameters(net, parameters: List[np.ndarray]):
+def set_parameters(net, parameters: List[np.ndarray], strict=False, keys = None):
     """Set the model parameters with given parameters."""
-    params_dict = zip(net.state_dict().keys(), parameters)
+    keys = net.state_dict().keys() if keys is None else keys
+    params_dict = zip(keys, parameters)
     state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
-    net.load_state_dict(state_dict, strict=True)
+    net.load_state_dict(state_dict, strict=strict)
 
 
 def make_optimizer(cfg, parameters):
@@ -116,3 +117,12 @@ def make_optimizer(cfg, parameters):
     else:
         raise ValueError("Give the right optimizer, LaLaLaaLaa")
     return optimizer
+
+class Scaler(nn.Module):
+    def __init__(self, rate):
+        super().__init__()
+        self.rate = rate
+
+    def forward(self, input):
+        output = input / self.rate if self.training else input
+        return output

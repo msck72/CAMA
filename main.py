@@ -118,9 +118,6 @@ def simulate_fl_training(experiment: Experiment, device: torch.device, cfg: Dict
 
     print(f"Sample distribution: {pd.Series([len(t.batch_sampler.sampler) for t in trainloaders]).describe()}")
 
-    # Initialize 1 model for initial params
-    model = create_model(cfg=cfg.Scenario, model_rate=1, device=device)
-    # initial_params = get_parameters(model)
 
     for i, (c, trainloader) in enumerate(zip(experiment.scenario.client_load_api.get_clients(), trainloaders)):
         c.num_samples = len(trainloader) * cfg.Simulation['BATCH_SIZE']
@@ -138,7 +135,10 @@ def simulate_fl_training(experiment: Experiment, device: torch.device, cfg: Dict
     # The `evaluate` function will be by Flower called after every round
     def server_eval_fn(server_round: int, parameters: flwr.common.NDArrays, config: Dict[str, flwr.common.Scalar]):
         net = create_model(cfg=cfg.Scenario, model_rate=1, device=device, track=True)
-        set_parameters(net, parameters, strict=False, keys=create_model(cfg=cfg.Scenario, model_rate=1, device=device).state_dict().keys())  # Update model with the latest parameters
+        if cfg.Scenario.track:
+            set_parameters(net, parameters)
+        else:
+            set_parameters(net, parameters, strict=False, keys=create_model(cfg=cfg.Scenario, model_rate=1, device=device).state_dict().keys())  # Update model with the latest parameters
         
         print("start of going through trainset")
         start_time = time.time()
@@ -160,18 +160,20 @@ def simulate_fl_training(experiment: Experiment, device: torch.device, cfg: Dict
 
    
     model_rates = [1, 0.5, 0.25, 0.125, 0.0625]
-    client_to_param_index = {i: [v.shape for _, v in create_model(cfg.Scenario, i).state_dict().items()] for i in model_rates}
+    client_to_param_index = {i: [v.shape for _, v in create_model(cfg.Scenario, i, track=cfg.Scenario.track).state_dict().items()] for i in model_rates}
     client_to_batches = [len(client_train_loader) for client_train_loader in trainloaders]
 
     client_manager = FedZeroCM(experiment.scenario.power_domain_api, experiment.scenario.client_load_api, experiment.scenario, cfg, client_to_batches)
     
     pretrained_model = torchvision.models.resnet18(weights='DEFAULT')
     pretrained_model.fc = torch.nn.Linear(pretrained_model.fc.in_features, 10)
-    custom_model = create_model(cfg.Scenario, model_rate = 1)
+    custom_model = create_model(cfg.Scenario, model_rate = 1, track=cfg.Scenario.track)
 
     # Load compatible layers
-    # custom_model.load_state_dict({k: v for k, v in zip(custom_model.state_dict().keys(), pretrained_model.state_dict().values())}, strict=True)
-    custom_model.load_state_dict(pretrained_model.state_dict(), strict=False)
+    if cfg.track is True:
+        custom_model.load_state_dict({k: v for k, v in zip(custom_model.state_dict().keys(), pretrained_model.state_dict().values())}, strict=True)
+    else:
+        custom_model.load_state_dict(pretrained_model.state_dict(), strict=False)
     initial_params = get_parameters(custom_model)
 
     strategy = FedZero(

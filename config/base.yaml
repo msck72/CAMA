@@ -21,12 +21,13 @@ Scenario:
   overselect: 1
   forecast_error: "error"
   imbalanced_scenario: False
-  seed: 42  # Added seed for reproducibility
+  seed: 42
   beta: 0.5
+  shared_per_user: 2
 
-client_selection:  # New section for client selection parameters
-  alpha: 1  # Adjust this value as needed
-  exclusion_factor: 1  # Adjust this value as needed
+client_selection:
+  alpha: 1
+  exclusion_factor: 1
 
 optim_scheduler:
   optimizer: SGD
@@ -36,7 +37,7 @@ optim_scheduler:
 
 RAY_CLIENT_RESOURCES:
   num_cpus: 1
-  num_gpus: 0
+  num_gpus: 0.3
 
 RAY_INIT_ARGS:
   ignore_reinit_error: True

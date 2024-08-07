@@ -35,19 +35,10 @@ def get_dataloaders(dataset: str, num_clients: int, batch_size: int, beta: float
         trainloaders, testloader = load_mnist(num_clients, batch_size, beta)
         num_classes = len(np.unique(testloader.dataset.targets))
     elif dataset in ['cifar10', 'cifar100']:
-        trainloaders, testloader = load_cifar(dataset.upper(), num_clients, batch_size, beta)
-        num_classes = len(np.unique(testloader.dataset.targets))
-    elif dataset == 'shakespeare':
-        trainloaders, testloader = load_shakespeare(
-            train_data_dir='leaf/data/shakespeare/data/train',
-            test_data_dir='leaf/data/shakespeare/data/test',
-            batch_size=batch_size
-        )
-        num_classes = len(ALL_LETTERS)
-    elif dataset == 'kwt':
-        trainloaders, testloader, num_classes = load_speech(num_clients, batch_size)
-    elif dataset == 'tiny_imagenet':
-        trainloaders, testloader, num_classes = load_tiny_imagenet(num_clients, batch_size, beta)
+        # trainloaders, testloader = load_cifar(dataset.upper(), num_clients, batch_size, beta)
+        # num_classes = len(np.unique(testloader.dataset.targets))
+        num_classes = 10
+        trainloaders, testloader = load_cifar10_based_on_classes_per_client(num_clients, cfg.Scenario.shared_per_user , num_classes , batch_size, seed=cfg.Simulation['NIID_DATA_SEED'])
     else:
         raise NotImplementedError(f"Dataset '{dataset}' not implemented")
     return trainloaders, testloader, num_classes
@@ -90,7 +81,7 @@ def load_cifar(cifar_type: str, num_clients: int, batch_size: int, beta: float):
     return trainloaders, testloader
 
 
-def load_cifar10_based_on_classes_per_client(num_clients: int, batch_size: int):
+def load_cifar10_based_on_classes_per_client(num_clients: int, shared_per_user: int, num_classes: int, batch_size: int, seed = 42):
     train_transforms = transforms.Compose([
         transforms.RandomCrop(32, padding=4),
         transforms.RandomHorizontalFlip(),
@@ -103,12 +94,20 @@ def load_cifar10_based_on_classes_per_client(num_clients: int, batch_size: int):
         transforms.Normalize((0.4914, 0.4822, 0.4465), (0.247, 0.243, 0.261)),
     ])
 
-    trainset = CIFAR10(torchvision.datasets, 'CIFAR10')(
+    trainset = torchvision.datasets.CIFAR10(
         "./data", train=True, download=True, transform=train_transforms
     )
-    testset = getattr(torchvision.datasets, cifar_type)(
+    testset = torchvision.datasets.CIFAR10(
         "./data", train=False, download=True, transform=test_transforms
     )
+
+    client_trainsets = non_iid(trainset, num_classes, num_clients, shared_per_user, seed=seed)
+    client_train_data_loaders = []
+
+    for dataset in client_trainsets:
+        client_train_data_loaders.append(DataLoader(dataset,batch_size=batch_size,shuffle=True))
+    
+    return client_train_data_loaders, DataLoader(testset, batch_size=batch_size, shuffle=False)
 
 def load_mnist(num_clients: int, batch_size: int, beta: float):
     train_transforms = transforms.Compose([
@@ -205,17 +204,14 @@ def non_iid(
             ].item()
             data_split[i].extend(label_idx_split[label_i].pop(idx))
 
-    return (
-        _get_dataset_from_idx(dataset, data_split, num_clients),
-        label_split,
-    )
+    return _get_dataset_from_idx(dataset, data_split, num_clients)
 
 
 def _split_dataset_targets_idx(dataset, shard_per_user, num_clients, classes_size):
     label = np.array(dataset.target) if hasattr(dataset, "target") else dataset.targets
     label_idx_split: Dict = {}
     for i, _ in enumerate(label):
-        label_i = label[i].item()
+        label_i = label[i]
         if label_i not in label_idx_split:
             label_idx_split[label_i] = []
         label_idx_split[label_i].append(i)

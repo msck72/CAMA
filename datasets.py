@@ -244,4 +244,3 @@ def _get_dataset_from_idx(dataset, data_split, num_clients):
     for i in range(num_clients):
         divided_dataset[i] = Subset(dataset, data_split[i])
     return divided_dataset
-

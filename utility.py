@@ -100,7 +100,7 @@ def get_parameters(net) -> List[np.ndarray]:
     return [val.cpu().numpy() for _, val in net.state_dict().items()]
 
 
-def set_parameters(net, parameters: List[np.ndarray], strict=False, keys = None):
+def set_parameters(net, parameters: List[np.ndarray], strict=True, keys = None):
     """Set the model parameters with given parameters."""
     keys = net.state_dict().keys() if keys is None else keys
     params_dict = zip(keys, parameters)

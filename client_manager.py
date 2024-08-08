@@ -215,12 +215,23 @@ class FedZeroCM(fl.server.ClientManager):
             all_classes[cls].append(i)
 
 
-        random_filtered_clients = []
+        sampled_filtered_clients = []
+        remember_the_index = []
+        num_clients_sampled = 0
         for k in all_classes.keys():
-            indices = random.sample(all_classes[k], 2)
-            for index in indices:
-                random_filtered_clients.append(filtered_clients[index])
-        filtered_clients = random_filtered_clients
+            if len(all_classes[k]) != 0:
+                indices = random.sample(all_classes[k], 2) if len(all_classes[k]) >= 2 else [all_classes[k][0]]
+                num_clients_sampled += 2 if len(all_classes[k]) >= 2 else 1
+                for index in indices:
+                    sampled_filtered_clients.append(filtered_clients[index])
+                    remember_the_index.append(index)
+
+        remember_the_index = sorted(remember_the_index, reverse=True)
+        if len(sampled_filtered_clients) < num_clients:
+            for index_already_used in remember_the_index:
+                filtered_clients.pop(index_already_used)
+                random.sample(filtered_clients, 2)
+        filtered_clients = sampled_filtered_clients
 
         self.time_now += timedelta(minutes=random.randint(10, 60))
         
@@ -370,11 +381,6 @@ def _filterby_forecasted_capacity_and_energy(power_domain_api: PowerDomainApi,
 def _sort_key(client):
     # return client.batches_per_timestep * client.energy_per_batch
     return client[1]
-
-def _has_more_resources_in_future(possible_batches, ree_powered_batches):
-    total_max_batches = np.max(np.minimum(possible_batches.values, ree_powered_batches.values))
-    batches_if_selected = min(possible_batches.to_list()[0], ree_powered_batches.to_list()[0])
-    return (False, batches_if_selected) if (total_max_batches == batches_if_selected) else (True, 0)
 
 def _batches_to_class(batches, client_batches_to_execute):
     # return 1

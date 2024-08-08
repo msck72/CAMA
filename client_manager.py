@@ -206,17 +206,26 @@ class FedZeroCM(fl.server.ClientManager):
             filtered_clients = _filterby_forecasted_capacity_and_energy(self.power_domain_api, self.client_load_api, clnts, self.time_now, self.cfg, duration=i)
             i += 1
             # loop to find out atleast two 1s
-            client_classes = [_batches_to_class(i, self.client_to_batches[int(client.name.split('_')[0])] * self.cfg.Simulation.EPOCHS) for _, i in filtered_clients]
+            client_classes = [_batches_to_class(i, self.client_to_batches[int(clnt.name.split('_')[0])] * self.cfg.Simulation.EPOCHS) for clnt, i in filtered_clients]
             if client_classes.count(1) >= 2:
                 break
         
-        
+        all_classes = {1:[], 0.5:[], 0.25:[], 0.125:[], 0.0625: []}
+        for i, cls in enumerate(client_classes):
+            all_classes[cls].append(i)
+
+
+        random_filtered_clients = []
+        for k in all_classes.keys():
+            indices = random.sample(all_classes[k], 2)
+            for index in indices:
+                random_filtered_clients.append(filtered_clients[index])
+        filtered_clients = random_filtered_clients
+
         self.time_now += timedelta(minutes=random.randint(10, 60))
         
-        filtered_clients = filtered_clients[:num_clients]
+        # filtered_clients = filtered_clients[:num_clients]
         carbon_footprint_till_now = 0
-        
-        division = _divide_batches_to_class([exp_btcs for _, exp_btcs in filtered_clients])
 
         for client, expected_batches in filtered_clients:
             batches_in_client = self.client_to_batches[int(client.name.split('_')[0])] * self.cfg.Simulation.EPOCHS
@@ -388,8 +397,3 @@ def _batches_to_class(batches, client_batches_to_execute):
 
 def _ws_to_kwh(ws: float) -> float:
     return ws / 3600 / 1000
-
-
-def _divide_batches_to_class(exp_batches):
-    sorted_batches = sorted(exp_batches, reverse = True)
-    return sorted_batches[1::2]

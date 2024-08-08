@@ -35,10 +35,12 @@ def get_dataloaders(dataset: str, num_clients: int, batch_size: int, beta: float
         trainloaders, testloader = load_mnist(num_clients, batch_size, beta)
         num_classes = len(np.unique(testloader.dataset.targets))
     elif dataset in ['cifar10', 'cifar100']:
-        trainloaders, testloader = load_cifar(dataset.upper(), num_clients, batch_size, beta)
-        num_classes = len(np.unique(testloader.dataset.targets))
-        # num_classes = 10
-        # trainloaders, testloader = load_cifar10_based_on_classes_per_client(num_clients, cfg.Scenario.shared_per_user , num_classes , batch_size, seed=cfg.Simulation['NIID_DATA_SEED'])
+        if cfg.Scenario.distribution == 'Dirichlet':
+            trainloaders, testloader = load_cifar(dataset.upper(), num_clients, batch_size, beta)
+            num_classes = len(np.unique(testloader.dataset.targets))
+        else:
+            num_classes = 10
+            trainloaders, testloader = load_cifar10_based_on_classes_per_client(num_clients, cfg.Scenario.shared_per_user , num_classes , batch_size, seed=cfg.Simulation['NIID_DATA_SEED'])
     else:
         raise NotImplementedError(f"Dataset '{dataset}' not implemented")
     return trainloaders, testloader, num_classes

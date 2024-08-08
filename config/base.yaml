@@ -23,6 +23,7 @@ Scenario:
   forecast_error: "error"
   imbalanced_scenario: False
   seed: 42
+  distribution: Dirichlet
   beta: 0.5
   shared_per_user: 2
 

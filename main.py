@@ -170,7 +170,7 @@ def simulate_fl_training(experiment: Experiment, device: torch.device, cfg: Dict
     custom_model = create_model(cfg.Scenario, model_rate = 1, track=cfg.Scenario.track)
 
     # Load compatible layers
-    if cfg.track is True:
+    if cfg.Scenario.track is True:
         custom_model.load_state_dict({k: v for k, v in zip(custom_model.state_dict().keys(), pretrained_model.state_dict().values())}, strict=True)
     else:
         custom_model.load_state_dict(pretrained_model.state_dict(), strict=False)

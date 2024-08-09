@@ -210,46 +210,59 @@ class FedZeroCM(fl.server.ClientManager):
             if client_classes.count(1) >= 2:
                 break
         
+        # for i, (c, _) in enumerate(filtered_clients):
+        #     filtered_clients[i] = (c, client_classes[i])
+        
+        # filtered_clients = sorted(filtered_clients, key=_sort_key, reverse=True)
+
+        num_clients_to_sample = 10
         all_classes = {1:[], 0.5:[], 0.25:[], 0.125:[], 0.0625: []}
-        for i, cls in enumerate(client_classes):
-            all_classes[cls].append(i)
-
-
-        sampled_filtered_clients = []
-        remember_the_index = []
-        num_clients_sampled = 0
+        temp_classes = []
         for k in all_classes.keys():
-            if len(all_classes[k]) != 0:
-                indices = random.sample(all_classes[k], 2) if len(all_classes[k]) >= 2 else [all_classes[k][0]]
-                num_clients_sampled += 2 if len(all_classes[k]) >= 2 else 1
-                for index in indices:
-                    sampled_filtered_clients.append(filtered_clients[index])
-                    remember_the_index.append(index)
+            temp_classes.extend([k for _ in range(int(num_clients_to_sample / len(all_classes)))])
+        
+        class_assignment = [min(a[1], b) for a, b in zip(filtered_clients[:num_clients_to_sample], temp_classes)]
+        filtered_clients = filtered_clients[:num_clients_to_sample]
+        for i, (cl, bts) in enumerate(filtered_clients):
+            filtered_clients[i] = (cl, class_assignment[i])
 
-        remember_the_index = sorted(remember_the_index, reverse=True)
-        if len(sampled_filtered_clients) < num_clients:
-            for index_already_used in remember_the_index:
-                filtered_clients.pop(index_already_used)
-                random.sample(filtered_clients, 2)
-        filtered_clients = sampled_filtered_clients
+        # for i, cls in enumerate(client_classes):
+        #     all_classes[cls].append(i)
+
+
+        # sampled_filtered_clients = []
+        # remember_the_index = []
+        # num_clients_sampled = 0
+        # for k in all_classes.keys():
+        #     if len(all_classes[k]) != 0:
+        #         # indices = random.sample(all_classes[k], 2) if len(all_classes[k]) >= 2 else [all_classes[k][0]]
+        #         indices = all_classes[k][:2] if len(all_classes[k]) >= 2 else [all_classes[k][0]]
+        #         num_clients_sampled += 2 if len(all_classes[k]) >= 2 else 1
+        #         for index in indices:
+        #             sampled_filtered_clients.append(filtered_clients[index])
+        #             remember_the_index.append(index)
+
+        # remember_the_index = sorted(remember_the_index, reverse=True)
+        # if len(sampled_filtered_clients) < min_num_clients:
+        #     for index_already_used in remember_the_index:
+        #         filtered_clients.pop(index_already_used)
+        #         sampled_filtered_clients.extend(random.sample(filtered_clients, 2))
+        # filtered_clients = sampled_filtered_clients
 
         self.time_now += timedelta(minutes=random.randint(10, 60))
         
         # filtered_clients = filtered_clients[:num_clients]
         carbon_footprint_till_now = 0
 
-        for client, expected_batches in filtered_clients:
+        for client, model_rate in filtered_clients:
             batches_in_client = self.client_to_batches[int(client.name.split('_')[0])] * self.cfg.Simulation.EPOCHS
-            carbon_footprint_till_now += client.record_usage( batches_in_client, _batches_to_class(expected_batches, batches_in_client))
+            carbon_footprint_till_now += client.record_usage( batches_in_client, model_rate)
 
 
         this_round_carbon_footprint = _ws_to_kwh(carbon_footprint_till_now)
         self.total_carbon_foorprint += this_round_carbon_footprint
         #carbon footprint history
         self.carbon_foot_print_history[server_round] = this_round_carbon_footprint
-        
-
-
 
         # print('testing carbon footprint = ', _ws_to_kwh(sum(client.participated_batches * client.energy_per_batch for client in self.client_load_api.get_clients())))
         print(f"carbon_footprint till now ({server_round}) = ",  self.total_carbon_foorprint)
@@ -294,8 +307,8 @@ class FedZeroCM(fl.server.ClientManager):
 
     def _clients_to_numpy_clients(self, clients):
         cids = []
-        for clnt, batches in clients:
-            cids.append((self.clients[clnt.name], _batches_to_class(batches, self.client_to_batches[int(clnt.name.split('_')[0])] * self.cfg.Simulation.EPOCHS)))
+        for clnt, model_rate in clients:
+            cids.append((self.clients[clnt.name], model_rate))
         return cids
     
 

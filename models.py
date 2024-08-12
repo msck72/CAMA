@@ -107,9 +107,9 @@ class Conv(nn.Module):
             )
             label_mask[input_dict["label_split"]] = 1
             out = out.masked_fill(label_mask == 0, 0)
-        output["score"] = out
-        output["loss"] = F.cross_entropy(out, input_dict["label"], reduction="mean")
-        return output
+        # output["score"] = out
+        # output["loss"] = F.cross_entropy(out, input_dict["label"], reduction="mean")
+        return out
 
 
 def conv(

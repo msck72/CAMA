@@ -14,7 +14,7 @@ Simulation:
 
 Scenario:
   scenario: "global"
-  dataset: "cifar10"
+  dataset: "cifar10" # or mnist
   model: "conv"
   hidden_layers: [64, 128, 256, 512]
   track: True
@@ -23,7 +23,7 @@ Scenario:
   forecast_error: "error"
   imbalanced_scenario: False
   seed: 42
-  distribution: Dirichlet
+  distribution: Dirichlet #HeteroFL_Non_iid for non-iid distribution defined in HeteroFL
   beta: 0.5
   shared_per_user: 2
 
@@ -33,7 +33,7 @@ client_selection:
 
 optim_scheduler:
   optimizer: SGD
-  lr: 0.001
+  lr: 0.001 # lr: 0.01 for MNIST
   momentum: 0.9
   weight_decay: 5.00e-04
 

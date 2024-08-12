@@ -163,17 +163,29 @@ def simulate_fl_training(experiment: Experiment, device: torch.device, cfg: Dict
     client_to_param_index = {i: [v.shape for _, v in create_model(cfg.Scenario, i, track=cfg.Scenario.track).state_dict().items()] for i in model_rates}
     client_to_batches = [len(client_train_loader) for client_train_loader in trainloaders]
 
-    client_manager = FedZeroCM(experiment.scenario.power_domain_api, experiment.scenario.client_load_api, experiment.scenario, cfg, client_to_batches)
+    client_labels = []
+    for i, dataloader in enumerate(trainloaders):
+        unique_labels = set()
+    
+        # Iterate through the DataLoader to find unique labels
+        for data, labels in dataloader:
+            unique_labels.update(labels.tolist())  # Convert tensor to list and update the set
+
+        client_labels.append(unique_labels)
+
+    client_manager = FedZeroCM(experiment.scenario.power_domain_api, experiment.scenario.client_load_api, experiment.scenario, cfg, client_to_batches, client_labels=client_labels)
     
     pretrained_model = torchvision.models.resnet18(weights='DEFAULT')
     pretrained_model.fc = torch.nn.Linear(pretrained_model.fc.in_features, 10)
     custom_model = create_model(cfg.Scenario, model_rate = 1, track=cfg.Scenario.track)
 
     # Load compatible layers
-    if cfg.Scenario.track is True:
-        custom_model.load_state_dict({k: v for k, v in zip(custom_model.state_dict().keys(), pretrained_model.state_dict().values())}, strict=True)
-    else:
-        custom_model.load_state_dict(pretrained_model.state_dict(), strict=False)
+    if cfg.Scenario.dataset == 'cifar10':
+        if cfg.Scenario.track is True:
+            custom_model.load_state_dict({k: v for k, v in zip(custom_model.state_dict().keys(), pretrained_model.state_dict().values())}, strict=True)
+        else:
+            custom_model.load_state_dict(pretrained_model.state_dict(), strict=False)
+    
     initial_params = get_parameters(custom_model)
 
     strategy = FedZero(

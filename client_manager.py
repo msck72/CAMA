@@ -59,6 +59,7 @@ class FedZeroCM(fl.server.ClientManager):
         self.carbon_foot_print_history = {}
         # self.client_history = {client : {'weighted_p_c' : 0, } for client in all_clients}
         # self._clients_to_cid = clients_to_cid
+        self.total_time_taken = 0
 
 
     def __len__(self) -> int:
@@ -202,7 +203,7 @@ class FedZeroCM(fl.server.ClientManager):
 
         clnts = [client for client in clnts if client not in self.excluded_clients]
 
-        i = _DURATION
+        i = 0
         while(True):
             filtered_clients = _filterby_forecasted_capacity_and_energy(self.power_domain_api, self.client_load_api, clnts, self.time_now, self.cfg, duration=i)
             i += 1
@@ -210,7 +211,8 @@ class FedZeroCM(fl.server.ClientManager):
             client_classes = [_batches_to_class(i, self.client_to_batches[int(clnt.name.split('_')[0])] * self.cfg.Simulation.EPOCHS) for clnt, i in filtered_clients]
             if client_classes.count(1) >= 2:
                 break
-        
+        print(f'i = {i}')
+        self.total_time_taken += i
         # for i, (c, _) in enumerate(filtered_clients):
         #     filtered_clients[i] = (c, client_classes[i])
         
@@ -281,9 +283,10 @@ class FedZeroCM(fl.server.ClientManager):
         self.carbon_foot_print_history[server_round] = this_round_carbon_footprint
 
         # print('testing carbon footprint = ', _ws_to_kwh(sum(client.participated_batches * client.energy_per_batch for client in self.client_load_api.get_clients())))
-        print(f"carbon_footprint till now ({server_round}) = ",  self.total_carbon_foorprint)
+        print(f"Renewable excess energy consumed till now ({server_round}) = {self.total_carbon_foorprint} kwh")
         #print the carbon footprint history
-        print(f"carbon footprint history = ", self.carbon_foot_print_history)
+        print(f"Renewable excess energy consumption history = ", self.carbon_foot_print_history)
+        # print(f'total_time_taken = {self.total_time_taken}')
 
         cids_filtered_clients = self._clients_to_numpy_clients(filtered_clients)
 

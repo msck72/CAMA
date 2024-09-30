@@ -40,7 +40,3 @@ optim_scheduler:
 RAY_CLIENT_RESOURCES:
   num_cpus: 1
   num_gpus: 0.3
-
-RAY_INIT_ARGS:
-  ignore_reinit_error: True
-  include_dashboard: False

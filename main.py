@@ -18,10 +18,6 @@ import pickle
 from pathlib import Path
 from utility import get_parameters, set_parameters
 
-import os
-print(os.getcwd())
-print(os.listdir())
-
 from datasets import get_dataloaders
 from client import test, FlowerNumPyClient
 from models import create_model
@@ -35,9 +31,6 @@ from strategy import FedZero
 class Experiment:
     scenario: Scenario
     overselect: float
-    net_arch: str
-    optimizer: str
-    opt_args: Dict
     beta: Optional[float]
     proximal_mu: float
     dataset: str
@@ -54,7 +47,7 @@ class Experiment:
         #     error_str = f",{self.scenario.forecast_error}"
 
         experiment_name = (f"{scenario_str}{imbalanced_str},"
-                           f"{self.dataset},{iid_str},{self.net_arch},"
+                           f"{self.dataset},{iid_str},"
                            f"{aggregation_strategy},"
                            f"{overselect_str}{error_str}")
 
@@ -65,11 +58,11 @@ class Experiment:
 
 
 def get_model_and_hyperparameters(dataset, iid):
-    optimizer = "SGD"
+    # optimizer = "SGD"
     if dataset == "cifar10":
-        net_arch = 'resnet18'
+        # net_arch = 'resnet18'
         net_arch_size_factor = 1
-        opt_args = {'lr': 0.001, 'weight_decay': 5e-4, 'momentum': 0.9}
+        # opt_args = {'lr': 0.001, 'weight_decay': 5e-4, 'momentum': 0.9}
         if iid:
             proximal_mu = 0
             beta = 1
@@ -77,9 +70,9 @@ def get_model_and_hyperparameters(dataset, iid):
             proximal_mu = 0.1
             beta = 0.5
     elif dataset == "mnist":
-        net_arch = 'mlp'
+        # net_arch = 'mlp'
         net_arch_size_factor = 1
-        opt_args = {'lr': 0.01, 'weight_decay': 0, 'momentum': 0}
+        # opt_args = {'lr': 0.01, 'weight_decay': 0, 'momentum': 0}
         if iid:
             proximal_mu = 0
             beta = 1
@@ -87,9 +80,9 @@ def get_model_and_hyperparameters(dataset, iid):
             proximal_mu = 0.1
             beta = 0.5
     elif dataset == "femnist":
-        net_arch = 'cnn'
+        # net_arch = 'cnn'
         net_arch_size_factor = 1
-        opt_args = {'lr': 0.01, 'weight_decay': 0, 'momentum': 0}
+        # opt_args = {'lr': 0.01, 'weight_decay': 0, 'momentum': 0}
         if iid:
             proximal_mu = 0
             beta = 1
@@ -99,7 +92,7 @@ def get_model_and_hyperparameters(dataset, iid):
     else:
         raise ValueError(f"Unknown dataset: {dataset}")
     
-    return net_arch, net_arch_size_factor, optimizer, opt_args, proximal_mu, beta
+    return net_arch_size_factor, proximal_mu, beta
 
 
 def simulate_fl_training(experiment: Experiment, device: torch.device, cfg: DictConfig) -> None:
@@ -231,7 +224,7 @@ def main(cfg: DictConfig):
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print(f"USING DEVICE: {device}")
 
-    net_arch, net_arch_size_factor, optimizer, opt_args, proximal_mu, beta = get_model_and_hyperparameters(cfg.Scenario['dataset'], iid=False)
+    net_arch_size_factor, proximal_mu, beta = get_model_and_hyperparameters(cfg.Scenario['dataset'], iid=False)
 
     if "fedzero" in cfg.Scenario['approach']:
         split = cfg.Scenario['approach'].split("_")
@@ -258,9 +251,6 @@ def main(cfg: DictConfig):
 
     experiment = Experiment(scenario=scenario,
                             overselect=cfg.Scenario['overselect'],
-                            net_arch=net_arch,
-                            optimizer=optimizer,
-                            opt_args=opt_args,
                             beta=beta,
                             proximal_mu=proximal_mu,
                             dataset=cfg.Scenario['dataset'])
